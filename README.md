@@ -29,7 +29,7 @@ flutter pub get
 flutter run
 ```
 
-**To get started in 5 minutes:** Check out the [QUICKSTART.md](https://www.google.com/search?q=QUICKSTART.md) file.
+**To get started in 5 minutes:** Check out the [QUICKSTART.md](QUICKSTART.md) file.
 
 ## 📱 Screenshots
 
@@ -50,10 +50,10 @@ flutter run
 
 | File | Description |
 | --- | --- |
-| [QUICKSTART.md](https://www.google.com/search?q=QUICKSTART.md) | 5-minute startup guide |
-| [GUIDE.md](https://www.google.com/search?q=REHBER.md) | Detailed user guide |
-| [DEVELOPING.md](https://www.google.com/search?q=DEVELOPING.md) | Developer guide |
-| [CODE_STRUCTURE.md](https://www.google.com/search?q=CODE_STRUCTURE.md) | Code structure and architecture |
+| [QUICKSTART.md](QUICKSTART.md) | 5-minute startup guide |
+| [GUIDE.md](REHBER.md) | Detailed user guide |
+| [DEVELOPING.md](DEVELOPING.md) | Developer guide |
+| [CODE_STRUCTURE.md](CODE_STRUCTURE.md) | Code structure and architecture |
 
 ## 🏗️ Technical Details
 
@@ -152,7 +152,7 @@ flutter build web --release
 
 ## 📝 License
 
-Distributed under the MIT License. See [LICENSE](https://www.google.com/search?q=LICENSE) for more information.
+Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
 
 ## 🤝 Contributing
 
