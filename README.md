@@ -1,69 +1,70 @@
-# 🌳 Adiyok - Ağaç & Gelir/Gider Yönetim Uygulaması
+# 🌳 Adiyok - Tree & Finance Management App
 
-Adiyok, modern Flutter uygulaması ile ağaç yapılarını oluşturup yönetebilirken aynı zamanda gelir ve gider takibi yapabileceğiniz, havalı ve profesyonel bir uygulamadır.
+Adiyok is a modern and professional Flutter application designed to help you manage hierarchical tree structures while simultaneously tracking income and expenses.
 
-## 🎯 Özellikleri
+## 🎯 Features
 
-### 🌳 Ağaç Yapısı Yönetimi
-- ✅ Kök eleman oluşturma
-- ✅ Sınırsız hiyerarşik alt elemanlar
-- ✅ Smooth genişlet/daralt animasyonları
-- ✅ Düzenleme ve silme işlemleri
-- ✅ Derinlik ve nod sayısı istatistikleri
+### 🌳 Tree Structure Management
+- ✅ Create root elements
+- ✅ Unlimited hierarchical sub-elements
+- ✅ Smooth expand/collapse animations
+- ✅ Edit and delete operations
+- ✅ Depth and node count statistics
 
-### 💰 Gelir/Gider Takibi
-- ✅ Gelir ekleme (5 kategori)
-- ✅ Gider ekleme (8 kategori)
-- ✅ Renk kodlaması (Yeşil/Kırmızı)
-- ✅ Net gelir otomatik hesapla
-- ✅ Kategori bazında istatistikler
-- ✅ Tarih bazında filtreleme
+### 💰 Income/Expense Tracking
+- ✅ Add income (5 categories)
+- ✅ Add expenses (8 categories)
+- ✅ Color coding (Green/Red)
+- ✅ Automatic net income calculation
+- ✅ Category-based statistics
+- ✅ Date-based filtering
 
-## 🚀 Hızlı Başlama
+## 🚀 Quick Start
 
 ```bash
-# Paketleri yükle
+# Install packages
 flutter pub get
 
-# Uygulamayı çalıştır
+# Run the app
 flutter run
 ```
 
-**5 dakika içinde başlamak için:** [QUICKSTART.md](QUICKSTART.md) dosyasını okuyun.
+**To get started in 5 minutes:** Check out the [QUICKSTART.md](https://www.google.com/search?q=QUICKSTART.md) file.
 
-## 📱 Ekran Görüntüleri
+## 📱 Screenshots
 
-![Finans Screenshot](readme/screenshot-linux-v0.0.1-1.png)
+### Tree Structure
 
-### Ağaç Yapısı
-- Kök elemanlar ve hiyerarşik yapısı
-- Genişletilmiş/daraltılmış görüntü
-- İstatistik gösterimi
+* Root elements and hierarchical view
+* Expanded/collapsed states
+* Statistics display
 
-### Gelir/Gider Yönetimi
-- Net gelir özeti
-- İşlem listeleri
-- Kategori özeti
-- Filtreleme sekmeleri
+### Finance Management
 
-## 📚 Dokümantasyon
+* Net income summary
+* Transaction lists
+* Category breakdown
+* Filter tabs
 
-| Dosya | Açıklama |
-|-------|----------|
-| [QUICKSTART.md](QUICKSTART.md) | 5 dakikada başlama rehberi |
-| [REHBER.md](REHBER.md) | Detaylı kullanım rehberi (Türkçe) |
-| [DEVELOPING.md](DEVELOPING.md) | Geliştirici rehberi |
-| [CODE_STRUCTURE.md](CODE_STRUCTURE.md) | Kod yapısı ve mimarisi |
+## 📚 Documentation
 
-## 🏗️ Teknik Detaylar
+| File | Description |
+| --- | --- |
+| [QUICKSTART.md](https://www.google.com/search?q=QUICKSTART.md) | 5-minute startup guide |
+| [GUIDE.md](https://www.google.com/search?q=REHBER.md) | Detailed user guide |
+| [DEVELOPING.md](https://www.google.com/search?q=DEVELOPING.md) | Developer guide |
+| [CODE_STRUCTURE.md](https://www.google.com/search?q=CODE_STRUCTURE.md) | Code structure and architecture |
 
-- **Framework:** Flutter 3.10.4+
-- **Language:** Dart 3.0+
-- **State Management:** Provider (ChangeNotifier)
-- **UI Framework:** Material Design 3
-- **Package Manager:** pub.dev
+## 🏗️ Technical Details
 
-### Bağımlılıklar
+* **Framework:** Flutter 3.10.4+
+* **Language:** Dart 3.0+
+* **State Management:** Provider (ChangeNotifier)
+* **UI Framework:** Material Design 3
+* **Package Manager:** pub.dev
+
+### Dependencies
+
 ```yaml
 provider: ^6.0.0          # State Management
 google_fonts: ^6.0.0      # Typography
@@ -71,53 +72,54 @@ intl: ^0.19.0             # Internationalization
 uuid: ^4.0.0              # Unique IDs
 ```
 
-## 📊 Proje İstatistikleri
+## 📊 Project Statistics
 
-- **Toplam Dart Dosya:** 14
-- **Toplam Kod Satırı:** 2,466
-- **Screens:** 3
-- **Providers:** 2
-- **Widgets:** 5
-- **Models:** 2
+* **Total Dart Files:** 14
+* **Total Lines of Code:** 2,466
+* **Screens:** 3
+* **Providers:** 2
+* **Widgets:** 5
+* **Models:** 2
 
-## 🎨 Tasarım
+## 🎨 Design
 
-- **Color Scheme:** Material Design 3 (Seed: #2D6A4F)
-- **Typography:** Google Fonts (Poppins)
-- **Icons:** Material Icons + Emoji
-- **Animations:** 300ms Smooth Transitions
+* **Color Scheme:** Material Design 3 (Seed: #2D6A4F)
+* **Typography:** Google Fonts (Poppins)
+* **Icons:** Material Icons + Emojis
+* **Animations:** 300ms Smooth Transitions
 
-## 💡 Kullanım Örnekleri
+## 💡 Usage Examples
 
-### Ağaç Oluşturma
-```
-1. "Ağaç" sekmesi → "Kök Eleman" butonuna tıkla
-2. "Şirketerim" adını gir
-3. "Ekle" butonuna tıkla
-4. Menüden "Alt Eleman Ekle"yi seç
-```
+### Creating a Tree
 
-### İşlem Ekleme
-```
-1. "Finans" sekmesi → "İşlem Ekle" butonuna tıkla
-2. "Gelir" veya "Gider" seç
-3. Başlık, tutar, kategori gir
-4. "Kaydet" butonuna tıkla
-```
+1. Go to "Tree" tab → Click "Add Root Element"
+2. Enter a name (e.g., "My Companies")
+3. Click "Add"
+4. Select "Add Sub-element" from the menu
 
-## 🔧 Geliştirme
+### Adding a Transaction
 
-### Proje Yapısı
+1. Go to "Finance" tab → Click "Add Transaction"
+2. Select "Income" or "Expense"
+3. Enter title, amount, and category
+4. Click "Save"
+
+## 🔧 Development
+
+### Project Structure
+
 ```
 lib/
-├── main.dart              # Uygulama giriş noktası
-├── models/                # Veri modelleri (2 dosya)
-├── providers/             # State Management (2 dosya)
-├── screens/               # Tam ekranlar (3 dosya)
-└── widgets/               # Widget bileşenleri (5 dosya)
+├── main.dart              # App entry point
+├── models/                # Data models (2 files)
+├── providers/             # State Management (2 files)
+├── screens/               # Full screens (3 files)
+└── widgets/               # Widget components (5 files)
+
 ```
 
 ### Build
+
 ```bash
 # Android
 flutter build apk --release
@@ -127,50 +129,45 @@ flutter build ios --release
 
 # Web
 flutter build web --release
+
 ```
 
-## ❓ Sık Sorulan Sorular
+## ❓ FAQ
 
-**S: Verilerim nereye kaydediliyor?**
-- Şu anda RAM'da (session boyunca). SharedPreferences eklenebilir.
+**Q: Where is my data stored?**
 
-**S: Çevrimdışı çalışır mı?**
-- Evet! Tamamen yerel, internet gerektirmez.
+* Currently stored in RAM (for the duration of the session). SharedPreferences/Local DB can be added.
 
-**S: Sınırsız veri saklayabilir miyim?**
-- Evet, pratik olarak 10,000+ işlem ve ağaç sorunsuz çalışır.
+**Q: Does it work offline?**
 
-**S: Tema değiştirebilir miyim?**
-- Evet, cihaz ayarları otomatik takip edilir.
+* Yes! It is entirely local and does not require an internet connection.
 
-## 📝 Lisans
+**Q: Can I store unlimited data?**
 
-MIT Lisansı. Detaylar için [LICENSE](LICENSE) dosyasına bakınız.
+* Yes, practically 10,000+ transactions and tree nodes will run smoothly.
 
-## 🤝 Katkıda Bulunma
+**Q: Can I change the theme?**
 
-Geliştirmeler ve öneriler için GitHub issues açabilirsiniz.
+* Yes, it automatically follows your device's system settings.
 
-## 📞 İletişim
+## 📝 License
 
-Sorular ve öneriler için lütfen iletişime geçiniz.
+Distributed under the MIT License. See [LICENSE](https://www.google.com/search?q=LICENSE) for more information.
+
+## 🤝 Contributing
+
+Feel free to open GitHub issues for improvements and suggestions.
+
+## 📞 Contact
+
+For questions and suggestions, please feel free to reach out.
 
 ---
 
-**Version:** 1.0.0  
-**Status:** ✅ Tamamlandı  
-**Last Updated:** Ocak 2026
+**Version:** 1.0.0
 
-## Getting Started
+**Status:** ✅ Completed
 
-This project is a starting point for a Flutter application.
+**Last Updated:** January 2026
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-
-Babam için yaptığım tree proramı.
-by erdamn. (Yusuf Erdem Kaymak)
+*Developed with ❤️ by **erdamn** (Yusuf Erdem Kaymak) for his father.*
