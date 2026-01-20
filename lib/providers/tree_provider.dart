@@ -18,7 +18,6 @@ class TreeProvider extends ChangeNotifier {
   TreeNode? get selectedNode => _selectedNode;
   int get totalRoots => _roots.length;
 
-  /// Yeni bir kök nod ekle
   void addRoot(String name, {String? description, String? category}) {
     final newRoot = TreeNode(
       name: name,
@@ -30,7 +29,6 @@ class TreeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Belirtilen kökten alt eleman ekle
   void addChild(
     String parentId,
     String childName, {
@@ -53,13 +51,11 @@ class TreeProvider extends ChangeNotifier {
     }
   }
 
-  /// Bir nodu genişlet/daralt
   void toggleNodeExpansion(String nodeId) {
     for (int i = 0; i < _roots.length; i++) {
       final node = _roots[i].findNodeById(nodeId);
       if (node != null) {
         node.isExpanded = !node.isExpanded;
-        // Root'u güncelle (immutable pattern)
         _roots[i] = _roots[i];
         notifyListeners();
         return;
@@ -67,7 +63,6 @@ class TreeProvider extends ChangeNotifier {
     }
   }
 
-  /// Belirtilen nodu seç
   void selectNode(String nodeId) {
     for (var root in _roots) {
       final node = root.findNodeById(nodeId);
@@ -79,7 +74,6 @@ class TreeProvider extends ChangeNotifier {
     }
   }
 
-  /// Belirtilen nodu sil
   void deleteNode(String nodeId) {
     _roots.removeWhere((root) => root.id == nodeId);
 
@@ -111,7 +105,6 @@ class TreeProvider extends ChangeNotifier {
     return false;
   }
 
-  /// Belirtilen nodu güncelle
   void updateNode(
     String nodeId,
     String newName, {
@@ -170,7 +163,6 @@ class TreeProvider extends ChangeNotifier {
     return false;
   }
 
-  /// Tüm kategorileri al (kök elemanlardan)
   List<String> getAllCategories() {
     final categories = <String>{};
     for (var root in _roots) {
@@ -191,7 +183,6 @@ class TreeProvider extends ChangeNotifier {
     }
   }
 
-  /// Ağacın toplam derinliğini al
   int getMaxTreeDepth() {
     if (_roots.isEmpty) return 0;
     return _roots
@@ -199,12 +190,10 @@ class TreeProvider extends ChangeNotifier {
         .reduce((a, b) => a > b ? a : b);
   }
 
-  /// Toplam nod sayısını al
   int getTotalNodeCount() {
     return _roots.fold(0, (sum, root) => sum + root.getTotalNodeCount());
   }
 
-  /// Tüm ağacı temizle
   void clearAllTrees() {
     _roots.clear();
     _selectedNode = null;
