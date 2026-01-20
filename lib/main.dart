@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        title: 'Adiyok - Ağaç & Gelir/Gider',
+        title: 'Adiyok - Ağaç & Gelir/Gider Yönetimi',
         theme: ThemeData(
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(
