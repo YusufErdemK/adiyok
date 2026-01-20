@@ -44,7 +44,6 @@ class StatsSummary extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            // Income and Expense Cards
             Row(
               children: [
                 Expanded(
