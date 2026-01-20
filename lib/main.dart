@@ -5,10 +5,8 @@ import 'package:provider/provider.dart';
 import 'providers/tree_provider.dart';
 import 'providers/transaction_provider.dart';
 import 'screens/home_screen.dart';
-// import 'demo_data.dart';  // Demo veri için gerekli olduğunda import edin
 
 void main() async {
-  // Türkçe locale verilerini yükle
   await initializeDateFormatting('tr_TR');
   runApp(const MyApp());
 }
