@@ -33,6 +33,8 @@ flutter run
 
 ## 📱 Screenshots
 
+![ssv0.0.1](readme/screenshot-linux-v0.0.1-1.png)
+
 ### Tree Structure
 
 * Root elements and hierarchical view
