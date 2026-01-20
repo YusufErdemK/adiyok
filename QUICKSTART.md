@@ -1,232 +1,258 @@
-# ⚡ Adiyok - Hızlı Başlama Rehberi
+# ⚡ Adiyok - Quick Start Guide
 
-## 30 Saniyede Başla
+## Start in 30 Seconds
 
 ```bash
-cd /home/erdem/adiyok
+cd /your/project/path/adiyok
 flutter pub get
 flutter run
 ```
 
-✅ Hepsi bu kadar! Uygulamaya hoş geldiniz.
+✅ That’s it! Welcome to the app.
 
 ---
 
-## İlk 5 Dakikada Neler Yapılabilir?
+## What Can You Do in the First 5 Minutes?
 
-### 1️⃣ Ağaç Oluştur (1 dakika)
-```
-1. "Ağaç" sekmesine git
-2. Yeşil "Kök Eleman" butonuna tıkla
-3. "Şirketerim" yazıp "Ekle" butonuna tıkla
-4. Ağacı genişletmek için kartı tıkla
-```
+### 1️⃣ Create a Tree (1 minute)
 
-### 2️⃣ Alt Eleman Ekle (1 dakika)
-```
-1. Yeni oluşturulan kök elemanın sağındaki menu (⋮)
-2. "Alt Eleman Ekle" seç
-3. "Frontend Projesi" yaz ve ekle
-4. Daha fazla alt eleman ekle
-```
+1. Go to the "Tree" tab
+2. Click the green "Root Element" button
+3. Type "My Companies" and click "Add"
+4. Tap the card to expand the tree
 
-### 3️⃣ Gelir Ekle (1.5 dakika)
-```
-1. "Finans" sekmesine git
-2. "İşlem Ekle" butonuna tıkla
-3. "💰 Gelir" seçili halde
-4. Başlık: "Maaş"
-5. Tutar: "5000"
-6. Kategori: "Maaş" 
-7. "Kaydet" butonuna tıkla
-```
 
-### 4️⃣ Gider Ekle (1.5 dakika)
-```
-1. "İşlem Ekle" butonuna tıkla
-2. "💸 Gider" seçilir hale getir
-3. Başlık: "Kira"
-4. Tutar: "2500"
-5. Kategori: "Kira"
-6. "Kaydet" butonuna tıkla
-```
+### 2️⃣ Add Sub-elements (1 minute)
 
-### 5️⃣ İstatistikleri Gör (0.5 dakika)
-```
-1. Finans sekmesinde "Tümü" sekmesinde
-2. En üstte Net Gelir, Toplam Gelir, Toplam Gider'i gör
-3. İşlemler aşağıda yeşil/kırmızı renkleriyle gösterilir
-```
+1. Tap the menu (⋮) on the right of your new root element
+2. Select "Add Sub-element"
+3. Type "Frontend Project" and click add
+4. Add more sub-elements as needed
 
----
+### 3️⃣ Add Income (1.5 minutes)
 
-## 🎯 Temel Özellikler Özeti
+1. Go to the "Finance" tab
+2. Click the "Add Transaction" button
+3. Ensure "💰 Income" is selected
+4. Title: "Salary"
+5. Amount: "5000"
+6. Category: "Salary" 
+7. Click the "Save" button
 
-| Özellik | Ağaç Sekmesi | Finans Sekmesi |
-|---------|------------|----------------|
-| Oluştur | ✅ Kök eleman | ✅ İşlem |
-| Genişlet | ✅ Alt elemanlar | ✅ - |
-| Düzenle | ✅ Adı/Açıklamayı | ✅ Tüm detayları |
-| Sil | ✅ | ✅ |
-| İstatistik | ✅ Derinlik, nod sayısı | ✅ Toplam, kategori |
-| Renk Kodu | ❌ | ✅ Yeşil/Kırmızı |
+
+### 4️⃣ Add Expense (1.5 minutes)
+
+1. Click the "Add Transaction" button
+2. Select "💸 Expense"
+3. Title: "Rent"
+4. Amount: "2500"
+5. Category: "Rent"
+6. Click the "Save" button
+
+
+### 5️⃣ View Statistics (0.5 minutes)
+
+1. Stay in the Finance tab under the "All" section
+2. View Net Income, Total Income, and Total Expense at the top
+3. Transactions are listed below with Green/Red color coding
+
 
 ---
 
-## 🎨 Sistem Kullanım
+## 🎯 Core Features Summary
 
-### Ağaç Yapısı - Ne İçin?
+| Feature | Tree Tab | Finance Tab |
+| --- | --- | --- |
+| Create | ✅ Root element | ✅ Transaction |
+| Expand | ✅ Sub-elements | ✅ - |
+| Edit | ✅ Name/Description | ✅ All details |
+| Delete | ✅ Yes | ✅ Yes |
+| Statistics | ✅ Depth, Node count | ✅ Totals, Category |
+| Color Code | ❌ No | ✅ Green/Red |
+
+---
+
+## 🎨 System Usage
+
+### Tree Structure - What for?
+
 ```
-Örneğin bir şirket yapısını modelleyebilir:
-┌─ Şirketerim
-│  ├─ Frontend Takımı
-│  │  ├─ React Projesi
-│  │  └─ Vue Projesi
-│  └─ Backend Takımı
-│     ├─ API Geliştirme
-│     └─ Database Tasarımı
+For example, modeling a company structure:
+┌─ My Companies
+│  ├─ Frontend Team
+│  │  ├─ React Project
+│  │  └─ Vue Project
+│  └─ Backend Team
+│     ├─ API Development
+│     └─ Database Design
 
-Ya da Kişisel Projeler:
-┌─ Kişisel Projeler
-│  ├─ Flutter Öğrenme
+Or Personal Projects:
+┌─ Personal Projects
+│  ├─ Learning Flutter
 │  │  ├─ Widgets
 │  │  └─ State Management
-│  └─ Web Geliştirme
+│  └─ Web Development
+
 ```
 
-### Gelir/Gider - Ne İçin?
-```
-✅ Aylık bütçenizi takip etmek
-✅ Harcamaları kategorilere göre görmek
-✅ Başlangıçtan sonra net geliri hesaplamak
-✅ Tarih bazında işlemleri kaydetmek
+### Income/Expense - What for?
 
-Örnek:
-Jan 1: Maaş +5000 (Gelir)
-Jan 5: Kira -2500 (Gider)
-Jan 10: Restorana -450 (Gider)
+```
+✅ Track your monthly budget
+✅ See expenses by category
+✅ Calculate net income instantly
+✅ Record transactions by date
+
+Example:
+Jan 1: Salary +5000 (Income)
+Jan 5: Rent -2500 (Expense)
+Jan 10: Restaurant -450 (Expense)
 Net: +2050 ✅
+
 ```
 
 ---
 
-## 💡 Yararlı İpuçları
+## 💡 Helpful Tips
 
-### 🎯 Verileri Kaydetmek İçin
-> Şu anda veriler uygulama çalıştığı sürece saklanır. 
-> Uygulamayı kapatıp açtığınızda sıfırlanır.
-> Kalıcı hale getirmek için `SharedPreferences` entegrasyonu yapılabilir.
+### 🎯 Saving Data
 
-### 📱 Küçük Ekranlar İçin
-> Bütün öğeler responsive tasarlanmıştır. 
-> Tablet ve büyük ekranlarda daha hoş görünür.
+> Currently, data is stored in memory (RAM) during the session.
+> It will reset when the app is closed.
+> You can integrate `SharedPreferences` to make data persistent.
+
+### 📱 For Small Screens
+
+> All elements are designed to be responsive.
+> The UI looks even better on tablets and large screens.
 
 ### 🌙 Dark Mode
-> Material Design 3 otomatik olarak sistem temasını takip eder.
-> Cihazınızda dark mode açıksa uygulama da dark olur.
 
-### ⚡ Performans
-> 1000+ nod ile bile sorunsuz çalışır.
-> Ağaç genişletme/daraltma smooth ve hızlıdır.
+> Material Design 3 automatically follows your system theme.
+> If your device is in Dark Mode, the app will switch automatically.
+
+### ⚡ Performance
+
+> Runs smoothly even with 1000+ nodes.
+> Tree expansion/collapsing is smooth and fast.
 
 ---
 
-## 🛠️ Hızlı Ayarlamalar
+## 🛠️ Quick Adjustments
 
-### Renkleri Değiştir
-`lib/main.dart` dosyasında:
+### Change Colors
+
+In `lib/main.dart`:
+
 ```dart
-seedColor: const Color(0xFF2D6A4F),  // ← Buraya başka renk kodu yaz
-// Örn: 0xFFFF6B6B (Kırmızı), 0xFF4ECDC4 (Turkuaz)
+seedColor: const Color(0xFF2D6A4F),  // ← Change this hex code
+// Ex: 0xFFFF6B6B (Red), 0xFF4ECDC4 (Turquoise)
+
 ```
 
-### Kategori Ekle
-`lib/models/transaction.dart` dosyasında:
+### Add Categories
+
+In `lib/models/transaction.dart`:
+
 ```dart
 enum TransactionCategory {
-  myNewCategory('Kategori Adı', '🆕'),
+  myNewCategory('Category Name', '🆕'),
   // ...
 }
+
 ```
 
 ---
 
-## 📋 Yapılabilecek İşlemler Checklisti
+## 📋 Action Checklist
 
-### Ağaç ile
-- [ ] Şirket yapısını modelleyin
-- [ ] Organizasyon şeması oluşturun
-- [ ] Proje hiyerarşisini takip edin
-- [ ] Derinlik istatistiklerini izleyin
+### With Tree
 
-### Finans ile
-- [ ] Aylık gelir/gider kaydedin
-- [ ] Bütçe hedeflerini belirleyin
-- [ ] Kategori bazında harcamaları kontrol edin
-- [ ] Tasarruf potansiyeli belirleyin
+* [ ] Model a company structure
+* [ ] Create an organizational chart
+* [ ] Track project hierarchies
+* [ ] Monitor depth statistics
 
----
+### With Finance
 
-## ❓ Sık Sorulan Sorular
-
-**S: Verilerim nasıl saklanır?**
-- Şu anda RAM'da saklanır (session boyunca). Kalıcı hale getirmek için SharedPreferences eklenebilir.
-
-**S: Bulutta senkronize olabilir mi?**
-- Firebase entegrasyonu yapılırsa senkronize edilebilir.
-
-**S: Kaç veri saklayabilirim?**
-- Teorik olarak sınırsız. Pratik olarak 10,000+ işlem ve ağaç sorunsuz çalışır.
-
-**S: Çevrimdışı çalışır mı?**
-- Evet! Tamamen yerel, internet gerektirmez.
-
-**S: Telefondan bilgisayara veri taşıyabilir miyim?**
-- Şu anda yok, ama JSON export eklenebilir.
+* [ ] Record monthly income/expenses
+* [ ] Set budget goals
+* [ ] Check expenses by category
+* [ ] Identify potential savings
 
 ---
 
-## 🚀 Sonraki Adımlar
+## ❓ FAQ
 
-1. **Denemeyi Bitiriniz** (5 dakika)
-   - Birkaç ağaç ve işlem oluşturun
-   - Tüm butonları tıklayın
+**Q: How is my data stored?**
 
-2. **Kodun Nasıl Çalıştığını Öğrenin** (15 dakika)
-   - `DEVELOPING.md` dosyasını okuyun
-   - `lib/` klasöründeki dosyaları keşfedin
+* Currently in RAM (per session). You can add SharedPreferences for persistence.
 
-3. **Özelleştirme Yapın** (30 dakika)
-   - Renkleri değiştirin
-   - Kategoriler ekleyin
-   - Kendi logonuzu ekleyin
+**Q: Can it sync to the cloud?**
 
-4. **Ekstra Özellikler Ekleyin** (1+ saat)
-   - SharedPreferences ile kalıcı depolama
-   - Export/Import fonksiyonalitesi
-   - Grafik analitiği
+* Yes, if Firebase integration is added.
 
----
+**Q: How much data can I store?**
 
-## 📞 Yardım
+* Theoretically unlimited. Practically, 10,000+ transactions/nodes will work without issues.
 
-- **Dosya bulamıyorum?** → `lib/` klasörüne bak
-- **Uygulamayı çalıştıramıyorum?** → `flutter doctor` çalıştır
-- **Veri kayboldu?** → `flutter run` ile yeniden başla
-- **Build hatası?** → `flutter clean` sonra `flutter pub get`
+**Q: Does it work offline?**
+
+* Yes! It is completely local and requires no internet.
+
+**Q: Can I transfer data from phone to PC?**
+
+* Not currently, but a JSON export feature could be added.
 
 ---
 
-## 🎉 Hepsi Bu!
+## 🚀 Next Steps
 
-Şimdi eğlenmeye başlamaya hazırsın! Adiyok ile:
-- ✅ Ağaçları yönet
-- ✅ Gelir/gideri takip et  
-- ✅ İstatistikleri gözlemle
-- ✅ Veriler ile oyunsa
+1. **Finish the Trial** (5 minutes)
+* Create a few trees and transactions
+* Test all the buttons
+
+
+2. **Learn How the Code Works** (15 minutes)
+* Read the `DEVELOPING.md` file
+* Explore files in the `lib/` folder
+
+
+3. **Customize** (30 minutes)
+* Change colors
+* Add new categories
+* Add your own logo
+
+
+4. **Add Extra Features** (1+ hour)
+* Persistent storage with SharedPreferences
+* Export/Import functionality
+* Analytical charts
+
+
+
+---
+
+## 📞 Troubleshooting
+
+* **Can't find a file?** → Look in the `lib/` folder
+* **App won't run?** → Run `flutter doctor`
+* **Data lost?** → Restart with `flutter run` (Data is currently session-based)
+* **Build error?** → Run `flutter clean` then `flutter pub get`
+
+---
+
+## 🎉 That’s It!
+
+You are ready to start! With Adiyok:
+
+* ✅ Manage trees
+* ✅ Track income/expenses
+* ✅ Observe statistics
+* ✅ Play with your data
 
 **Happy Coding! 🚀**
 
 ---
 
-Daha detaylı bilgi için `DEVELOPING.md` ve `REHBER.md` dosyalarını okuyunuz.
+For more detailed information, please read `DEVELOPING.md` and `GUIDE.md`.
