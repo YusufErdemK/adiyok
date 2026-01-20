@@ -1,0 +1,176 @@
+
+        <!DOCTYPE html>
+        <html lang="tr">
+        <head>
+            <meta charset="UTF-8">
+            <title>MDwex - Export</title>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css">
+            <style>
+                body { box-sizing: border-box; min-width: 200px; max-width: 980px; margin: 0 auto; padding: 45px; }
+                @media (max-width: 767px) { body { padding: 15px; } }
+            </style>
+        </head>
+        <body class="markdown-body">
+            <h1>🌳 Adiyok - Tree &amp; Finance Management App</h1>
+<p>Adiyok is a modern and professional Flutter application designed to help you manage hierarchical tree structures while simultaneously tracking income and expenses.</p>
+<h2>🎯 Features</h2>
+<h3>🌳 Tree Structure Management</h3>
+<ul>
+<li>✅ Create root elements</li>
+<li>✅ Unlimited hierarchical sub-elements</li>
+<li>✅ Smooth expand/collapse animations</li>
+<li>✅ Edit and delete operations</li>
+<li>✅ Depth and node count statistics</li>
+</ul>
+<h3>💰 Income/Expense Tracking</h3>
+<ul>
+<li>✅ Add income (5 categories)</li>
+<li>✅ Add expenses (8 categories)</li>
+<li>✅ Color coding (Green/Red)</li>
+<li>✅ Automatic net income calculation</li>
+<li>✅ Category-based statistics</li>
+<li>✅ Date-based filtering</li>
+</ul>
+<h2>🚀 Quick Start</h2>
+<pre><code class="language-bash"># Install packages
+flutter pub get
+
+# Run the app
+flutter run
+</code></pre>
+<p><strong>To get started in 5 minutes:</strong> Check out the <a href="QUICKSTART.md">QUICKSTART.md</a> file.</p>
+<h2>📱 Screenshots</h2>
+<h3>Tree Structure</h3>
+<ul>
+<li>Root elements and hierarchical view</li>
+<li>Expanded/collapsed states</li>
+<li>Statistics display</li>
+</ul>
+<h3>Finance Management</h3>
+<ul>
+<li>Net income summary</li>
+<li>Transaction lists</li>
+<li>Category breakdown</li>
+<li>Filter tabs</li>
+</ul>
+<h2>📚 Documentation</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="QUICKSTART.md">QUICKSTART.md</a></td>
+<td>5-minute startup guide</td>
+</tr>
+<tr>
+<td><a href="REHBER.md">GUIDE.md</a></td>
+<td>Detailed user guide</td>
+</tr>
+<tr>
+<td><a href="DEVELOPING.md">DEVELOPING.md</a></td>
+<td>Developer guide</td>
+</tr>
+<tr>
+<td><a href="CODE_STRUCTURE.md">CODE_STRUCTURE.md</a></td>
+<td>Code structure and architecture</td>
+</tr>
+</tbody></table>
+<h2>🏗️ Technical Details</h2>
+<ul>
+<li><strong>Framework:</strong> Flutter 3.10.4+</li>
+<li><strong>Language:</strong> Dart 3.0+</li>
+<li><strong>State Management:</strong> Provider (ChangeNotifier)</li>
+<li><strong>UI Framework:</strong> Material Design 3</li>
+<li><strong>Package Manager:</strong> pub.dev</li>
+</ul>
+<h3>Dependencies</h3>
+<pre><code class="language-yaml">provider: ^6.0.0          # State Management
+google_fonts: ^6.0.0      # Typography
+intl: ^0.19.0             # Internationalization
+uuid: ^4.0.0              # Unique IDs
+</code></pre>
+<h2>📊 Project Statistics</h2>
+<ul>
+<li><strong>Total Dart Files:</strong> 14</li>
+<li><strong>Total Lines of Code:</strong> 2,466</li>
+<li><strong>Screens:</strong> 3</li>
+<li><strong>Providers:</strong> 2</li>
+<li><strong>Widgets:</strong> 5</li>
+<li><strong>Models:</strong> 2</li>
+</ul>
+<h2>🎨 Design</h2>
+<ul>
+<li><strong>Color Scheme:</strong> Material Design 3 (Seed: #2D6A4F)</li>
+<li><strong>Typography:</strong> Google Fonts (Poppins)</li>
+<li><strong>Icons:</strong> Material Icons + Emojis</li>
+<li><strong>Animations:</strong> 300ms Smooth Transitions</li>
+</ul>
+<h2>💡 Usage Examples</h2>
+<h3>Creating a Tree</h3>
+<ol>
+<li>Go to "Tree" tab → Click "Add Root Element"</li>
+<li>Enter a name (e.g., "My Companies")</li>
+<li>Click "Add"</li>
+<li>Select "Add Sub-element" from the menu</li>
+</ol>
+<h3>Adding a Transaction</h3>
+<ol>
+<li>Go to "Finance" tab → Click "Add Transaction"</li>
+<li>Select "Income" or "Expense"</li>
+<li>Enter title, amount, and category</li>
+<li>Click "Save"</li>
+</ol>
+<h2>🔧 Development</h2>
+<h3>Project Structure</h3>
+<pre><code>lib/
+├── main.dart              # App entry point
+├── models/                # Data models (2 files)
+├── providers/             # State Management (2 files)
+├── screens/               # Full screens (3 files)
+└── widgets/               # Widget components (5 files)
+</code></pre>
+<h3>Build</h3>
+<pre><code class="language-bash"># Android
+flutter build apk --release
+
+# iOS
+flutter build ios --release
+
+# Web
+flutter build web --release
+</code></pre>
+<h2>❓ FAQ</h2>
+<p><strong>Q: Where is my data stored?</strong></p>
+<ul>
+<li>Currently stored in RAM (for the duration of the session). SharedPreferences/Local DB can be added.</li>
+</ul>
+<p><strong>Q: Does it work offline?</strong></p>
+<ul>
+<li>Yes! It is entirely local and does not require an internet connection.</li>
+</ul>
+<p><strong>Q: Can I store unlimited data?</strong></p>
+<ul>
+<li>Yes, practically 10,000+ transactions and tree nodes will run smoothly.</li>
+</ul>
+<p><strong>Q: Can I change the theme?</strong></p>
+<ul>
+<li>Yes, it automatically follows your device's system settings.</li>
+</ul>
+<h2>📝 License</h2>
+<p>Distributed under the MIT License. See <a href="LICENSE">LICENSE</a> for more information.</p>
+<h2>🤝 Contributing</h2>
+<p>Feel free to open GitHub issues for improvements and suggestions.</p>
+<h2>📞 Contact</h2>
+<p>For questions and suggestions, please feel free to reach out.</p>
+<hr>
+<p><strong>Version:</strong> 1.0.0</p>
+<p><strong>Status:</strong> ✅ Completed</p>
+<p><strong>Last Updated:</strong> January 2026</p>
+<p><em>Developed with ❤️ by <strong>erdamn</strong> (Yusuf Erdem Kaymak) for his father.</em></p>
+
+        </body>
+        </html>
+    
