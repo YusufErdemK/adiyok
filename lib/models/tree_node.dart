@@ -23,19 +23,16 @@ class TreeNode {
        children = children ?? [],
        createdAt = createdAt ?? DateTime.now();
 
-  /// Ağaca yeni bir alt eleman ekle
   void addChild(TreeNode child) {
     children.add(child);
   }
 
-  /// Belirtilen ID'li alt elemanı sil
   bool removeChild(String childId) {
     final originalLength = children.length;
     children.removeWhere((child) => child.id == childId);
     return children.length < originalLength;
   }
 
-  /// Belirtilen ID'li elemanı bul (recursive olarak)
   TreeNode? findNodeById(String nodeId) {
     if (id == nodeId) return this;
     for (var child in children) {
@@ -45,7 +42,6 @@ class TreeNode {
     return null;
   }
 
-  /// Ağacın derinliğini al
   int getDepth() {
     if (children.isEmpty) return 1;
     return 1 +
@@ -54,13 +50,11 @@ class TreeNode {
             .reduce((a, b) => a > b ? a : b);
   }
 
-  /// Toplam nod sayısını al (kendisi dahil)
   int getTotalNodeCount() {
     return 1 +
         children.fold(0, (sum, child) => sum + child.getTotalNodeCount());
   }
 
-  /// TreeNode'u kopyala
   TreeNode copyWith({
     String? name,
     String? description,
