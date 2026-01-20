@@ -76,8 +76,8 @@ uuid: ^4.0.0              # Unique IDs
 
 ## 📊 Project Statistics
 
-* **Total Dart Files:** 14
-* **Total Lines of Code:** 2,466
+* **Total Dart Files:** 17
+* **Total Lines of Code:** 2,419
 * **Screens:** 3
 * **Providers:** 2
 * **Widgets:** 5
