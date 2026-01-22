@@ -1,4 +1,4 @@
-# 🌳 Adiyok - Tree & Finance Management App  
+# 🌳 Adiyok - Tree & Finance Management App
 
 Adiyok is a modern and professional Flutter application designed to help you manage hierarchical tree structures while simultaneously tracking income and expenses.
 
