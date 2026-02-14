@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'tree_screen.dart';
 import 'transaction_screen.dart';
+import 'about_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -35,8 +36,15 @@ class _HomeScreenState extends State<HomeScreen> {
               onSelected: (value) {
                 if (value == 1) {
                   debugPrint('Ayarlar');
+                  // İleride: Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsScreen()));
                 } else if (value == 2) {
-                  debugPrint('Hakkında');
+                  // Hakkında sayfasına git
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AboutScreen(),
+                    ),
+                  );
                 }
               },
             ),
@@ -44,7 +52,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
 
-      /// Ali ve küçük kurbağa
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           boxShadow: [
