@@ -17,7 +17,34 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: screens[_currentIndex],
+      body: Stack(
+        children: [
+          screens[_currentIndex],
+          Positioned(
+            top: 10,
+            right: 6,
+            child: PopupMenuButton<int>(
+              icon: const Icon(Icons.more_vert),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              itemBuilder: (context) => const [
+                PopupMenuItem(value: 1, child: Text('Ayarlar')),
+                PopupMenuItem(value: 2, child: Text('Hakkında')),
+              ],
+              onSelected: (value) {
+                if (value == 1) {
+                  debugPrint('Ayarlar');
+                } else if (value == 2) {
+                  debugPrint('Hakkında');
+                }
+              },
+            ),
+          ),
+        ],
+      ),
+
+      /// Ali ve küçük kurbağa
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           boxShadow: [
@@ -33,15 +60,15 @@ class _HomeScreenState extends State<HomeScreen> {
           onDestinationSelected: (index) {
             setState(() => _currentIndex = index);
           },
-          destinations: [
+          destinations: const [
             NavigationDestination(
-              icon: const Icon(Icons.nature_outlined),
-              selectedIcon: const Icon(Icons.nature),
+              icon: Icon(Icons.nature_outlined),
+              selectedIcon: Icon(Icons.nature),
               label: 'Ağaç',
             ),
             NavigationDestination(
-              icon: const Icon(Icons.wallet_outlined),
-              selectedIcon: const Icon(Icons.wallet),
+              icon: Icon(Icons.wallet_outlined),
+              selectedIcon: Icon(Icons.wallet),
               label: 'Finans',
             ),
           ],
