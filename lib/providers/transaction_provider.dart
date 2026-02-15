@@ -1,15 +1,28 @@
 import 'package:flutter/material.dart';
 import '../models/transaction.dart';
+import '../services/storage_service.dart';
 import 'tree_provider.dart';
 
 class TransactionProvider extends ChangeNotifier {
   final List<Transaction> _transactions = [];
   final TreeProvider? _treeProvider;
+  bool _isLoading = true;
 
   TransactionProvider({TreeProvider? treeProvider})
-    : _treeProvider = treeProvider;
+    : _treeProvider = treeProvider {
+    _initializeTransactions();
+  }
+
+  Future<void> _initializeTransactions() async {
+    _transactions.clear();
+    _transactions.addAll(await StorageService.loadTransactionData());
+    _transactions.sort((a, b) => b.date.compareTo(a.date));
+    _isLoading = false;
+    notifyListeners();
+  }
 
   List<Transaction> get transactions => _transactions;
+  bool get isLoading => _isLoading;
 
   List<Transaction> get incomes =>
       _transactions.where((t) => t.isIncome).toList();
@@ -54,11 +67,13 @@ class TransactionProvider extends ChangeNotifier {
   void addTransaction(Transaction transaction) {
     _transactions.add(transaction);
     _transactions.sort((a, b) => b.date.compareTo(a.date));
+    _saveTransactionData();
     notifyListeners();
   }
 
   void deleteTransaction(String transactionId) {
     _transactions.removeWhere((t) => t.id == transactionId);
+    _saveTransactionData();
     notifyListeners();
   }
 
@@ -67,6 +82,7 @@ class TransactionProvider extends ChangeNotifier {
     if (index != -1) {
       _transactions[index] = updatedTransaction;
       _transactions.sort((a, b) => b.date.compareTo(a.date));
+      _saveTransactionData();
       notifyListeners();
     }
   }
@@ -93,10 +109,15 @@ class TransactionProvider extends ChangeNotifier {
 
   void clearAllTransactions() {
     _transactions.clear();
+    _saveTransactionData();
     notifyListeners();
   }
 
   List<Transaction> getTransactionsByCategory(TransactionCategory category) {
     return _transactions.where((t) => t.category == category).toList();
+  }
+
+  Future<void> _saveTransactionData() async {
+    await StorageService.saveTransactionData(_transactions);
   }
 }
