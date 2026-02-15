@@ -1,22 +1,26 @@
 import 'package:flutter/material.dart';
 import '../models/tree_node.dart';
+import '../services/storage_service.dart';
 
 class TreeProvider extends ChangeNotifier {
   TreeNode? _selectedNode;
   List<TreeNode> _roots = [];
+  bool _isLoading = true;
 
   TreeProvider() {
-    _initializeEmptyTree();
+    _initializeTree();
   }
 
-  void _initializeEmptyTree() {
-    _roots = [];
+  Future<void> _initializeTree() async {
+    _roots = await StorageService.loadTreeData();
+    _isLoading = false;
     notifyListeners();
   }
 
   List<TreeNode> get roots => _roots;
   TreeNode? get selectedNode => _selectedNode;
   int get totalRoots => _roots.length;
+  bool get isLoading => _isLoading;
 
   void addRoot(String name, {String? description, String? category}) {
     final newRoot = TreeNode(
@@ -26,6 +30,7 @@ class TreeProvider extends ChangeNotifier {
     );
     _roots.add(newRoot);
     _selectedNode = newRoot;
+    _saveTreeData();
     notifyListeners();
   }
 
@@ -45,6 +50,7 @@ class TreeProvider extends ChangeNotifier {
         );
         parent.addChild(newChild);
         _selectedNode = newChild;
+        _saveTreeData();
         notifyListeners();
         return;
       }
@@ -57,6 +63,7 @@ class TreeProvider extends ChangeNotifier {
       if (node != null) {
         node.isExpanded = !node.isExpanded;
         _roots[i] = _roots[i];
+        _saveTreeData();
         notifyListeners();
         return;
       }
@@ -82,6 +89,7 @@ class TreeProvider extends ChangeNotifier {
         if (_selectedNode?.id == nodeId) {
           _selectedNode = null;
         }
+        _saveTreeData();
         notifyListeners();
         return;
       }
@@ -119,6 +127,7 @@ class TreeProvider extends ChangeNotifier {
         newDescription,
         newCategory,
       )) {
+        _saveTreeData();
         notifyListeners();
         return;
       }
@@ -194,9 +203,14 @@ class TreeProvider extends ChangeNotifier {
     return _roots.fold(0, (sum, root) => sum + root.getTotalNodeCount());
   }
 
-  void clearAllTrees() {
+  void clearAllTrees() async {
     _roots.clear();
     _selectedNode = null;
+    await StorageService.clearAllData();
     notifyListeners();
+  }
+
+  Future<void> _saveTreeData() async {
+    await StorageService.saveTreeData(_roots);
   }
 }
