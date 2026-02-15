@@ -28,6 +28,13 @@ enum TransactionCategory {
   ].contains(this);
 
   bool get isExpense => !isIncome;
+
+  static TransactionCategory fromString(String value) {
+    return TransactionCategory.values.firstWhere(
+      (cat) => cat.name == value,
+      orElse: () => TransactionCategory.otherExpense,
+    );
+  }
 }
 
 class Transaction {
@@ -69,6 +76,31 @@ class Transaction {
       date: date ?? this.date,
       description: description ?? this.description,
       notes: notes ?? this.notes,
+    );
+  }
+
+  // Serialization methods
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'amount': amount,
+      'category': category.name,
+      'date': date.toIso8601String(),
+      'description': description,
+      'notes': notes,
+    };
+  }
+
+  static Transaction fromJson(Map<String, dynamic> json) {
+    return Transaction(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      amount: (json['amount'] as num).toDouble(),
+      category: TransactionCategory.fromString(json['category'] as String),
+      date: DateTime.parse(json['date'] as String),
+      description: json['description'] as String?,
+      notes: json['notes'] as String?,
     );
   }
 
