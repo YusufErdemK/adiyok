@@ -54,7 +54,7 @@ class AboutScreen extends StatelessWidget {
             _buildInfoCard(
               icon: Icons.person_outline,
               title: 'Geliştirici',
-              description: 'YusufErdemK',
+              description: 'YusufErdemK & den0',
             ),
             const SizedBox(height: 16),
             _buildInfoCard(
@@ -74,7 +74,7 @@ class AboutScreen extends StatelessWidget {
             const SizedBox(height: 40),
             // Footer
             Text(
-              '© 2026 erdamn - Hiç bir hakkı saklı değildir 😜',
+              '© 2026 erdamn & den0 - Hiç bir hakkı saklı değildir 😜',
               style: TextStyle(fontSize: 12, color: Colors.grey[500]),
             ),
             const SizedBox(height: 20),
