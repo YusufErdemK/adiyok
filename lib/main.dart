@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
+import 'services/storage_service.dart';
 import 'providers/tree_provider.dart';
 import 'providers/transaction_provider.dart';
 import 'screens/home_screen.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await StorageService.init();
   await initializeDateFormatting('tr_TR');
   runApp(const MyApp());
 }
