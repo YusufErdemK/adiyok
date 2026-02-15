@@ -162,7 +162,7 @@ Feel free to open GitHub issues for improvements and suggestions.
 
 ## 📞 Contact
 
-For questions and suggestions, please feel free to reach out.
+For questions and suggestions, please contact.
 
 ---
 
