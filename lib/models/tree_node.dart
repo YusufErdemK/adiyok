@@ -73,6 +73,35 @@ class TreeNode {
     );
   }
 
+  // Serialization methods
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'description': description,
+      'category': category,
+      'children': children.map((child) => child.toJson()).toList(),
+      'createdAt': createdAt.toIso8601String(),
+      'isExpanded': isExpanded,
+    };
+  }
+
+  static TreeNode fromJson(Map<String, dynamic> json) {
+    return TreeNode(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      description: json['description'] as String?,
+      category: json['category'] as String?,
+      children:
+          (json['children'] as List<dynamic>?)
+              ?.map((child) => TreeNode.fromJson(child as Map<String, dynamic>))
+              .toList() ??
+          [],
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      isExpanded: json['isExpanded'] as bool? ?? false,
+    );
+  }
+
   @override
   String toString() =>
       'TreeNode(id: $id, name: $name, children: ${children.length})';
