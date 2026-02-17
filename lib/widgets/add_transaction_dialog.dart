@@ -206,6 +206,9 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                 ),
               ),
               const SizedBox(height: 16),
+
+              // to do: buraya bir yerlere adet sayısı eklenecek
+
               // Category
               DropdownButtonFormField<TransactionCategory>(
                 initialValue: _selectedCategory,
@@ -298,6 +301,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                 maxLines: 2,
               ),
               const SizedBox(height: 24),
+
               // Action Buttons
               Row(
                 children: [
