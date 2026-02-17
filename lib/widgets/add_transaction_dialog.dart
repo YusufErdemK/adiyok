@@ -208,6 +208,21 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
               const SizedBox(height: 16),
 
               // to do: buraya bir yerlere adet sayısı eklenecek
+              // şimdilik kapatıyorum
+              /*
+              TextField(
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: 'Adet (İsteğe bağlı)',
+                  hintText: '1',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  prefixIcon: const Icon(Icons.format_list_numbered),
+                ),
+              ),
+              const SizedBox(height: 16),
+              */
 
               // Category
               DropdownButtonFormField<TransactionCategory>(
