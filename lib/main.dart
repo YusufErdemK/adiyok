@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -12,6 +13,11 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await StorageService.init();
   await initializeDateFormatting('tr_TR');
+
+  // TEST - uygulama açılırken ses çal
+  final player = AudioPlayer();
+  await player.play(AssetSource('sounds/click.mp3'));
+
   runApp(const MyApp());
 }
 
