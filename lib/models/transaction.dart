@@ -41,6 +41,7 @@ class Transaction {
   final String id;
   final String title;
   final double amount;
+  final int quantity;
   final TransactionCategory category;
   final DateTime date;
   final String? description;
@@ -50,6 +51,7 @@ class Transaction {
     String? id,
     required this.title,
     required this.amount,
+    this.quantity = 1,
     required this.category,
     DateTime? date,
     this.description,
@@ -63,6 +65,7 @@ class Transaction {
   Transaction copyWith({
     String? title,
     double? amount,
+    int? quantity,
     TransactionCategory? category,
     DateTime? date,
     String? description,
@@ -72,6 +75,7 @@ class Transaction {
       id: id,
       title: title ?? this.title,
       amount: amount ?? this.amount,
+      quantity: quantity ?? this.quantity,
       category: category ?? this.category,
       date: date ?? this.date,
       description: description ?? this.description,
@@ -85,6 +89,7 @@ class Transaction {
       'id': id,
       'title': title,
       'amount': amount,
+      'quantity': quantity,
       'category': category.name,
       'date': date.toIso8601String(),
       'description': description,
@@ -97,6 +102,7 @@ class Transaction {
       id: json['id'] as String,
       title: json['title'] as String,
       amount: (json['amount'] as num).toDouble(),
+      quantity: (json['quantity'] as int?) ?? 1,
       category: TransactionCategory.fromString(json['category'] as String),
       date: DateTime.parse(json['date'] as String),
       description: json['description'] as String?,
@@ -106,5 +112,5 @@ class Transaction {
 
   @override
   String toString() =>
-      'Transaction(id: $id, title: $title, amount: $amount, category: ${category.label})';
+      'Transaction(id: $id, title: $title, amount: $amount, quantity: $quantity, category: ${category.label})';
 }
