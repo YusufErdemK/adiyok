@@ -314,7 +314,7 @@ class _TreeNodeWidgetState extends State<TreeNodeWidget>
             TextField(
               controller: nameController,
               decoration: const InputDecoration(
-                labelText: 'Ad',
+                labelText: 'İsim',
                 border: OutlineInputBorder(),
               ),
             ),
@@ -332,7 +332,7 @@ class _TreeNodeWidgetState extends State<TreeNodeWidget>
             TextField(
               controller: categoryController,
               decoration: const InputDecoration(
-                labelText: 'Kategori (İşlem sırasında kullanılabilir)',
+                labelText: 'Kategori',
                 hintText: 'Örn: Kira, Maaş, Alışveriş',
                 border: OutlineInputBorder(),
               ),
