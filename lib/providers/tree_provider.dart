@@ -82,19 +82,26 @@ class TreeProvider extends ChangeNotifier {
   }
 
   void deleteNode(String nodeId) {
+    final rootRemoved = _roots.any((root) => root.id == nodeId);
     _roots.removeWhere((root) => root.id == nodeId);
 
-    for (var root in _roots) {
-      if (_deleteNodeRecursive(root, nodeId)) {
-        if (_selectedNode?.id == nodeId) {
-          _selectedNode = null;
-        }
-        _saveTreeData();
-        notifyListeners();
-        return;
+    if (rootRemoved) {
+      if (_selectedNode?.id == nodeId) {
+        _selectedNode = null;
       }
+      _saveTreeData();
+      notifyListeners();
+      return;
+    }
+
+  for (var root in _roots) {
+    if (_deleteNodeRecursive(root, nodeId)) {
+      _saveTreeData();
+      notifyListeners();
+      return;
     }
   }
+}
 
   bool _deleteNodeRecursive(TreeNode node, String targetId) {
     final childRemoved = node.removeChild(targetId);
