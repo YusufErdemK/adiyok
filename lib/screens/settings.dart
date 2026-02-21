@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/settings_provider.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -15,6 +16,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
   String _currency = 'TRY';
   String _language = 'TR';
 
+  static const String _soundEnabledKey = 'sound_enabled';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSoundSetting();
+  }
+
+  Future<void> _loadSoundSetting() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _soundEnabled = prefs.getBool(_soundEnabledKey) ?? true;
+    });
+  }
+
+  Future<void> _setSoundEnabled(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_soundEnabledKey, value);
+    setState(() => _soundEnabled = value);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,7 +44,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          // Genel Ayarlar
           _buildSectionTitle('Genel'),
           _buildSettingCard(
             child: Column(
@@ -42,9 +63,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   title: 'Ses Efektleri',
                   subtitle: 'Uygulama içi sesler',
                   value: _soundEnabled,
-                  onChanged: (value) {
-                    setState(() => _soundEnabled = value);
-                  },
+                  onChanged: _setSoundEnabled,
                 ),
               ],
             ),
@@ -52,7 +71,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           const SizedBox(height: 24),
 
-          // Görünüm
           _buildSectionTitle('Görünüm'),
           _buildSettingCard(
             child: Consumer<SettingsProvider>(
@@ -72,7 +90,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           const SizedBox(height: 24),
 
-          // Bölge ve Dil
           _buildSectionTitle('Bölge ve Dil'),
           _buildSettingCard(
             child: Column(
@@ -109,7 +126,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           const SizedBox(height: 24),
 
-          // Veri Yönetimi
           _buildSectionTitle('Veri Yönetimi'),
           _buildSettingCard(
             child: Column(
