@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../models/transaction.dart';
 import '../providers/transaction_provider.dart';
+import '../services/sound_service.dart';
 import 'glass_card.dart';
 
 class AddTransactionDialog extends StatefulWidget {
@@ -81,7 +82,6 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
 
     final currentCategories = _isIncome ? incomeCategories : expenseCategories;
 
-    // Eğer seçili kategori mevcut kategorilerde yoksa, ilkini seç
     if (!currentCategories.contains(_selectedCategory)) {
       _selectedCategory = currentCategories.first;
     }
@@ -109,7 +109,10 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () {
+                      SoundService.playClick();
+                      Navigator.pop(context);
+                    },
                   ),
                 ],
               ),
@@ -119,7 +122,10 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                 children: [
                   Expanded(
                     child: GestureDetector(
-                      onTap: () => setState(() => _isIncome = true),
+                      onTap: () {
+                        SoundService.playClick();
+                        setState(() => _isIncome = true);
+                      },
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
@@ -151,7 +157,10 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: GestureDetector(
-                      onTap: () => setState(() => _isIncome = false),
+                      onTap: () {
+                        SoundService.playClick();
+                        setState(() => _isIncome = false);
+                      },
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
@@ -258,6 +267,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
               // Date
               GestureDetector(
                 onTap: () async {
+                  SoundService.playClick();
                   final selectedDate = await showDatePicker(
                     context: context,
                     initialDate: _selectedDate,
@@ -318,13 +328,15 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                 maxLines: 2,
               ),
               const SizedBox(height: 24),
-
               // Action Buttons
               Row(
                 children: [
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () {
+                        SoundService.playClick();
+                        Navigator.pop(context);
+                      },
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         backgroundColor: Colors.grey[300],
@@ -356,24 +368,24 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
 
   void _saveTransaction() {
     if (_titleController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Lütfen başlık girin')));
+      SoundService.playClick();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Lütfen başlık girin')),
+      );
       return;
     }
 
     if (_amountController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Lütfen tutar girin')));
+      SoundService.playClick();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Lütfen tutar girin')),
+      );
       return;
     }
 
     try {
       final amount = double.parse(_amountController.text);
-      if (amount <= 0) {
-        throw Exception();
-      }
+      if (amount <= 0) throw Exception();
 
       final quantity = int.tryParse(_quantityController.text) ?? 1;
 
@@ -401,8 +413,10 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
         context.read<TransactionProvider>().addTransaction(transaction);
       }
 
+      SoundService.playSuccess();
       Navigator.pop(context);
     } catch (e) {
+      SoundService.playClick();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Lütfen geçerli bir tutar girin')),
       );

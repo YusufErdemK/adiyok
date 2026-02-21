@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/transaction.dart';
+import '../services/sound_service.dart';
 import 'glass_card.dart';
 
 class TransactionCard extends StatelessWidget {
@@ -92,10 +93,8 @@ class TransactionCard extends StatelessWidget {
                                 ),
                           ),
                         Text(
-                          DateFormat(
-                            'dd.MM.yyyy',
-                            'tr_TR',
-                          ).format(transaction.date),
+                          DateFormat('dd.MM.yyyy', 'tr_TR')
+                              .format(transaction.date),
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(color: Colors.grey[500], fontSize: 11),
                         ),
@@ -107,9 +106,8 @@ class TransactionCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     transaction.description!,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+                    style: Theme.of(context).textTheme.bodySmall
+                        ?.copyWith(color: Colors.grey[600]),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -122,8 +120,10 @@ class TransactionCard extends StatelessWidget {
           PopupMenuButton<String>(
             onSelected: (value) {
               if (value == 'delete') {
+                SoundService.playDelete();
                 onDelete?.call();
               } else if (value == 'edit') {
+                SoundService.playClick();
                 onEdit?.call();
               }
             },
