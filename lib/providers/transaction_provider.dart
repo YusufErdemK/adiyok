@@ -31,35 +31,35 @@ class TransactionProvider extends ChangeNotifier {
       _transactions.where((t) => t.isExpense).toList();
 
   double get totalIncome =>
-      incomes.fold(0, (sum, transaction) => sum + transaction.amount);
+      incomes.fold(0, (sum, t) => sum + t.amount * t.quantity);
 
   double get totalExpense =>
-      expenses.fold(0, (sum, transaction) => sum + transaction.amount);
+      expenses.fold(0, (sum, t) => sum + t.amount * t.quantity);
 
   double get netIncome => totalIncome - totalExpense;
 
   double getCategoryTotal(TransactionCategory category) {
     return _transactions
         .where((t) => t.category == category)
-        .fold(0, (sum, t) => sum + t.amount);
+        .fold(0, (sum, t) => sum + t.amount * t.quantity);
   }
 
   Map<String, double> getMonthlyIncome() {
     final monthly = <String, double>{};
-    for (var transaction in incomes) {
+    for (var t in incomes) {
       final monthKey =
-          '${transaction.date.year}-${transaction.date.month.toString().padLeft(2, '0')}';
-      monthly[monthKey] = (monthly[monthKey] ?? 0) + transaction.amount;
+          '${t.date.year}-${t.date.month.toString().padLeft(2, '0')}';
+      monthly[monthKey] = (monthly[monthKey] ?? 0) + t.amount * t.quantity;
     }
     return monthly;
   }
 
   Map<String, double> getMonthlyExpense() {
     final monthly = <String, double>{};
-    for (var transaction in expenses) {
+    for (var t in expenses) {
       final monthKey =
-          '${transaction.date.year}-${transaction.date.month.toString().padLeft(2, '0')}';
-      monthly[monthKey] = (monthly[monthKey] ?? 0) + transaction.amount;
+          '${t.date.year}-${t.date.month.toString().padLeft(2, '0')}';
+      monthly[monthKey] = (monthly[monthKey] ?? 0) + t.amount * t.quantity;
     }
     return monthly;
   }
