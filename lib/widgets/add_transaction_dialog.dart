@@ -18,6 +18,7 @@ class AddTransactionDialog extends StatefulWidget {
 class _AddTransactionDialogState extends State<AddTransactionDialog> {
   late TextEditingController _titleController;
   late TextEditingController _amountController;
+  late TextEditingController _quantityController;
   late TextEditingController _descriptionController;
   late TextEditingController _notesController;
 
@@ -35,6 +36,9 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
       _amountController = TextEditingController(
         text: widget.initialTransaction!.amount.toStringAsFixed(2),
       );
+      _quantityController = TextEditingController(
+        text: widget.initialTransaction!.quantity.toString(),
+      );
       _descriptionController = TextEditingController(
         text: widget.initialTransaction!.description,
       );
@@ -47,6 +51,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
     } else {
       _titleController = TextEditingController();
       _amountController = TextEditingController();
+      _quantityController = TextEditingController(text: '1');
       _descriptionController = TextEditingController();
       _notesController = TextEditingController();
       _selectedCategory = TransactionCategory.salary;
@@ -59,6 +64,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
   void dispose() {
     _titleController.dispose();
     _amountController.dispose();
+    _quantityController.dispose();
     _descriptionController.dispose();
     _notesController.dispose();
     super.dispose();
@@ -206,11 +212,9 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                 ),
               ),
               const SizedBox(height: 16),
-
-              // to do: buraya bir yerlere adet sayısı eklenecek
-              // şimdilik kapatıyorum
-              /*
+              // Quantity
               TextField(
+                controller: _quantityController,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   labelText: 'Adet (İsteğe bağlı)',
@@ -222,8 +226,6 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                 ),
               ),
               const SizedBox(height: 16),
-              */
-
               // Category
               DropdownButtonFormField<TransactionCategory>(
                 initialValue: _selectedCategory,
@@ -373,10 +375,13 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
         throw Exception();
       }
 
+      final quantity = int.tryParse(_quantityController.text) ?? 1;
+
       final transaction = Transaction(
         id: widget.initialTransaction?.id,
         title: _titleController.text.trim(),
         amount: amount,
+        quantity: quantity,
         category: _selectedCategory,
         date: _selectedDate,
         description: _descriptionController.text.trim().isEmpty
