@@ -132,7 +132,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                           color: _isIncome
                               ? Colors.green[100]
                               : Colors.transparent,
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(22),
                           border: Border.all(
                             color: _isIncome
                                 ? Colors.green[400]!
@@ -167,7 +167,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                           color: !_isIncome
                               ? Colors.red[100]
                               : Colors.transparent,
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(22),
                           border: Border.all(
                             color: !_isIncome
                                 ? Colors.red[400]!
@@ -314,12 +314,12 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                 maxLines: 2,
               ),
               const SizedBox(height: 16),
-              // Notes
+              // Company
               TextField(
                 controller: _notesController,
                 decoration: InputDecoration(
-                  labelText: 'Notlar (İsteğe bağlı)',
-                  hintText: 'Kişisel notlarınız...',
+                  labelText: 'İşletme (İsteğe bağlı)',
+                  hintText: 'Örn: Migros, Emlakçı vb.',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -369,17 +369,17 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
   void _saveTransaction() {
     if (_titleController.text.trim().isEmpty) {
       SoundService.playClick();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Lütfen başlık girin')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Lütfen başlık girin')));
       return;
     }
 
     if (_amountController.text.trim().isEmpty) {
       SoundService.playClick();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Lütfen tutar girin')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Lütfen tutar girin')));
       return;
     }
 
