@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/settings_provider.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -9,7 +11,6 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _notificationsEnabled = true;
-  bool _darkModeEnabled = false;
   bool _soundEnabled = true;
   String _currency = 'TRY';
   String _language = 'TR';
@@ -54,19 +55,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // Görünüm
           _buildSectionTitle('Görünüm'),
           _buildSettingCard(
-            child: _buildSwitchTile(
-              icon: Icons.dark_mode_outlined,
-              title: 'Karanlık Mod',
-              subtitle: 'Koyu tema kullan',
-              value: _darkModeEnabled,
-              onChanged: (value) {
-                setState(() => _darkModeEnabled = value);
-                // TODO: Tema değişikliğini uygula
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Tema değişikliği yakında eklenecek!'),
-                    duration: Duration(seconds: 2),
-                  ),
+            child: Consumer<SettingsProvider>(
+              builder: (context, settings, _) {
+                return _buildSwitchTile(
+                  icon: Icons.dark_mode_outlined,
+                  title: 'Karanlık Mod',
+                  subtitle: 'Koyu tema kullan',
+                  value: settings.darkMode,
+                  onChanged: (value) {
+                    settings.setDarkMode(value);
+                  },
                 );
               },
             ),
@@ -120,18 +118,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   icon: Icons.backup_outlined,
                   title: 'Yedekleme',
                   subtitle: 'Verilerini yedekle',
-                  onTap: () {
-                    _showBackupDialog();
-                  },
+                  onTap: _showBackupDialog,
                 ),
                 const Divider(height: 1),
                 _buildActionTile(
                   icon: Icons.restore_outlined,
                   title: 'Geri Yükle',
                   subtitle: 'Yedeği geri yükle',
-                  onTap: () {
-                    _showRestoreDialog();
-                  },
+                  onTap: _showRestoreDialog,
                 ),
                 const Divider(height: 1),
                 _buildActionTile(
@@ -140,9 +134,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   subtitle: 'Uygulamayı sıfırla',
                   iconColor: Colors.red,
                   textColor: Colors.red,
-                  onTap: () {
-                    _showDeleteDialog();
-                  },
+                  onTap: _showDeleteDialog,
                 ),
               ],
             ),
