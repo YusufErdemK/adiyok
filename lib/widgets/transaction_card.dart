@@ -60,7 +60,9 @@ class TransactionCard extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            transaction.category.label,
+                            transaction.quantity > 1
+                                ? '${transaction.category.label} · ${transaction.quantity} adet'
+                                : transaction.category.label,
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(color: Colors.grey[600]),
                           ),
