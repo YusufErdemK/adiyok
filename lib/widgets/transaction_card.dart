@@ -21,6 +21,7 @@ class TransactionCard extends StatelessWidget {
     final amountColor = isIncome ? Colors.green[600] : Colors.red[600];
     final iconColor = isIncome ? Colors.green[400] : Colors.red[400];
     final backgroundColor = isIncome ? Colors.green[50] : Colors.red[50];
+    final totalAmount = transaction.amount * transaction.quantity;
 
     return GlassCard(
       backgroundColor: backgroundColor?.withAlpha(100),
@@ -73,7 +74,7 @@ class TransactionCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          '${isIncome ? '+' : '-'}₺${transaction.amount.toStringAsFixed(2)}',
+                          '${isIncome ? '+' : '-'}₺${totalAmount.toStringAsFixed(2)}',
                           style: Theme.of(context).textTheme.titleSmall
                               ?.copyWith(
                                 color: amountColor,
@@ -81,6 +82,15 @@ class TransactionCard extends StatelessWidget {
                               ),
                         ),
                         const SizedBox(height: 4),
+                        if (transaction.quantity > 1)
+                          Text(
+                            '₺${transaction.amount.toStringAsFixed(2)} × ${transaction.quantity}',
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Colors.grey[500],
+                                  fontSize: 11,
+                                ),
+                          ),
                         Text(
                           DateFormat(
                             'dd.MM.yyyy',
