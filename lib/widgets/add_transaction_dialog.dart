@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../models/transaction.dart';
+import '../models/tree_node.dart';
 import '../providers/transaction_provider.dart';
+import '../providers/tree_provider.dart';
 import '../services/sound_service.dart';
 import 'glass_card.dart';
 
@@ -24,8 +26,26 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
   late TextEditingController _notesController;
 
   late TransactionCategory _selectedCategory;
+  String? _selectedTreeNodeId;
+  String? _selectedTreeNodeName;
   late DateTime _selectedDate;
   late bool _isIncome;
+
+  // Ağaçtaki tüm node'ları düz listeye çek
+  List<TreeNode> _flattenNodes(List<TreeNode> roots) {
+    final result = <TreeNode>[];
+    void traverse(TreeNode node) {
+      result.add(node);
+      for (final child in node.children) {
+        traverse(child);
+      }
+    }
+
+    for (final root in roots) {
+      traverse(root);
+    }
+    return result;
+  }
 
   @override
   void initState() {
@@ -47,6 +67,8 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
         text: widget.initialTransaction!.notes,
       );
       _selectedCategory = widget.initialTransaction!.category;
+      _selectedTreeNodeId = widget.initialTransaction!.treeNodeId;
+      _selectedTreeNodeName = widget.initialTransaction!.treeNodeName;
       _selectedDate = widget.initialTransaction!.date;
       _isIncome = widget.initialTransaction!.isIncome;
     } else {
@@ -56,6 +78,8 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
       _descriptionController = TextEditingController();
       _notesController = TextEditingController();
       _selectedCategory = TransactionCategory.salary;
+      _selectedTreeNodeId = null;
+      _selectedTreeNodeName = null;
       _selectedDate = DateTime.now();
       _isIncome = true;
     }
@@ -71,6 +95,12 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
     super.dispose();
   }
 
+  // Dropdown value: enum için "e:salary", tree için "t:nodeId"
+  String get _dropdownValue {
+    if (_selectedTreeNodeId != null) return 't:$_selectedTreeNodeId';
+    return 'e:${_selectedCategory.name}';
+  }
+
   @override
   Widget build(BuildContext context) {
     final incomeCategories = TransactionCategory.values
@@ -79,12 +109,16 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
     final expenseCategories = TransactionCategory.values
         .where((cat) => cat.isExpense)
         .toList();
+    final currentEnumCategories = _isIncome
+        ? incomeCategories
+        : expenseCategories;
 
-    final currentCategories = _isIncome ? incomeCategories : expenseCategories;
-
-    if (!currentCategories.contains(_selectedCategory)) {
-      _selectedCategory = currentCategories.first;
+    if (_selectedTreeNodeId == null &&
+        !currentEnumCategories.contains(_selectedCategory)) {
+      _selectedCategory = currentEnumCategories.first;
     }
+
+    final allNodes = _flattenNodes(context.watch<TreeProvider>().roots);
 
     return Dialog(
       insetPadding: const EdgeInsets.all(16),
@@ -124,7 +158,12 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                     child: GestureDetector(
                       onTap: () {
                         SoundService.playClick();
-                        setState(() => _isIncome = true);
+                        setState(() {
+                          _isIncome = true;
+                          _selectedTreeNodeId = null;
+                          _selectedTreeNodeName = null;
+                          _selectedCategory = TransactionCategory.salary;
+                        });
                       },
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -159,7 +198,12 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                     child: GestureDetector(
                       onTap: () {
                         SoundService.playClick();
-                        setState(() => _isIncome = false);
+                        setState(() {
+                          _isIncome = false;
+                          _selectedTreeNodeId = null;
+                          _selectedTreeNodeName = null;
+                          _selectedCategory = TransactionCategory.rent;
+                        });
                       },
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -235,26 +279,88 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                 ),
               ),
               const SizedBox(height: 16),
-              // Category
-              DropdownButtonFormField<TransactionCategory>(
-                initialValue: _selectedCategory,
-                onChanged: (category) {
-                  if (category != null) {
-                    setState(() => _selectedCategory = category);
-                  }
+              // Kategori - enum + ağaç node'ları
+              DropdownButtonFormField<String>(
+                value: _dropdownValue,
+                isExpanded: true,
+                onChanged: (value) {
+                  if (value == null) return;
+                  setState(() {
+                    if (value.startsWith('t:')) {
+                      // Ağaç node seçildi
+                      final nodeId = value.substring(2);
+                      final node = allNodes.firstWhere((n) => n.id == nodeId);
+                      _selectedTreeNodeId = node.id;
+                      _selectedTreeNodeName = node.name;
+                    } else {
+                      // Enum kategori seçildi
+                      _selectedTreeNodeId = null;
+                      _selectedTreeNodeName = null;
+                      _selectedCategory = TransactionCategory.fromString(
+                        value.substring(2),
+                      );
+                    }
+                  });
                 },
-                items: currentCategories.map((category) {
-                  return DropdownMenuItem(
-                    value: category,
-                    child: Row(
-                      children: [
-                        Text(category.emoji),
-                        const SizedBox(width: 8),
-                        Text(category.label),
-                      ],
+                items: [
+                  // Standart kategoriler başlığı
+                  DropdownMenuItem(
+                    enabled: false,
+                    value: '__enum_header__',
+                    child: Text(
+                      '── Standart Kategoriler ──',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).primaryColor,
+                      ),
                     ),
-                  );
-                }).toList(),
+                  ),
+                  ...currentEnumCategories.map((cat) {
+                    return DropdownMenuItem(
+                      value: 'e:${cat.name}',
+                      child: Row(
+                        children: [
+                          Text(cat.emoji),
+                          const SizedBox(width: 8),
+                          Text(cat.label),
+                        ],
+                      ),
+                    );
+                  }),
+                  // Ağaç elemanları varsa göster
+                  if (allNodes.isNotEmpty) ...[
+                    DropdownMenuItem(
+                      enabled: false,
+                      value: '__tree_header__',
+                      child: Text(
+                        '── Ağaç Elemanları ──',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                    ),
+                    ...allNodes.map((node) {
+                      return DropdownMenuItem(
+                        value: 't:${node.id}',
+                        child: Row(
+                          children: [
+                            const Text('🌳'),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                node.name,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                  ],
+                ],
                 decoration: InputDecoration(
                   labelText: 'Kategori',
                   border: OutlineInputBorder(
@@ -264,7 +370,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                 ),
               ),
               const SizedBox(height: 16),
-              // Date
+              // Tarih
               GestureDetector(
                 onTap: () async {
                   SoundService.playClick();
@@ -314,7 +420,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                 maxLines: 2,
               ),
               const SizedBox(height: 16),
-              // Company
+              // Notes
               TextField(
                 controller: _notesController,
                 decoration: InputDecoration(
@@ -374,7 +480,6 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
       ).showSnackBar(const SnackBar(content: Text('Lütfen başlık girin')));
       return;
     }
-
     if (_amountController.text.trim().isEmpty) {
       SoundService.playClick();
       ScaffoldMessenger.of(
@@ -386,7 +491,6 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
     try {
       final amount = double.parse(_amountController.text);
       if (amount <= 0) throw Exception();
-
       final quantity = int.tryParse(_quantityController.text) ?? 1;
 
       final transaction = Transaction(
@@ -395,6 +499,8 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
         amount: amount,
         quantity: quantity,
         category: _selectedCategory,
+        treeNodeId: _selectedTreeNodeId,
+        treeNodeName: _selectedTreeNodeName,
         date: _selectedDate,
         description: _descriptionController.text.trim().isEmpty
             ? null
