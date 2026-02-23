@@ -36,7 +36,7 @@ class TransactionCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              transaction.category.emoji,
+              transaction.displayEmoji,
               style: const TextStyle(fontSize: 24),
             ),
           ),
@@ -63,8 +63,8 @@ class TransactionCard extends StatelessWidget {
                           const SizedBox(height: 4),
                           Text(
                             transaction.quantity > 1
-                                ? '${transaction.category.label} · ${transaction.quantity} adet'
-                                : transaction.category.label,
+                                ? '${transaction.displayCategory} · ${transaction.quantity} adet'
+                                : transaction.displayCategory,
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(color: Colors.grey[600]),
                           ),
@@ -93,8 +93,10 @@ class TransactionCard extends StatelessWidget {
                                 ),
                           ),
                         Text(
-                          DateFormat('dd.MM.yyyy', 'tr_TR')
-                              .format(transaction.date),
+                          DateFormat(
+                            'dd.MM.yyyy',
+                            'tr_TR',
+                          ).format(transaction.date),
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(color: Colors.grey[500], fontSize: 11),
                         ),
@@ -106,8 +108,9 @@ class TransactionCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     transaction.description!,
-                    style: Theme.of(context).textTheme.bodySmall
-                        ?.copyWith(color: Colors.grey[600]),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
