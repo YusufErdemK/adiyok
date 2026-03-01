@@ -50,3 +50,4 @@ devtools_options.yaml
 
 # really?
 .vscode/
+.env
