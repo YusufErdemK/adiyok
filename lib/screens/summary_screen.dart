@@ -93,6 +93,7 @@ Lütfen şunları yap:
 3. 💰 2-3 somut tasarruf önerisi sun
 4. 🌳 Ağaç yapısı kullanımı hakkında yorum yap
 5. ✅ Motive edici bir kapanış yap
+6. Yanlış yorum yapmamaya özen göster.
 
 Başlıklar ve emoji kullanarak düzenli yaz.''';
 
