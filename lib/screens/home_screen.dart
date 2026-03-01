@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'tree_screen.dart';
 import 'transaction_screen.dart';
+import 'summary_screen.dart';
 import 'about_screen.dart';
 import 'settings.dart';
 
@@ -14,7 +15,11 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
-  final screens = [const TreeScreen(), const TransactionScreen()];
+  final screens = [
+    const TreeScreen(),
+    const TransactionScreen(),
+    const SummaryScreen(),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +60,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           boxShadow: [
@@ -81,6 +85,11 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: Icon(Icons.wallet_outlined),
               selectedIcon: Icon(Icons.wallet),
               label: 'Finans',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.auto_awesome_outlined),
+              selectedIcon: Icon(Icons.auto_awesome),
+              label: 'Özet',
             ),
           ],
         ),
