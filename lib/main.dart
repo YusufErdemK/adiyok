@@ -8,15 +8,12 @@ import 'providers/tree_provider.dart';
 import 'providers/transaction_provider.dart';
 import 'providers/settings_provider.dart';
 import 'screens/home_screen.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: '.env');
   await StorageService.init();
   await initializeDateFormatting('tr_TR');
 
-  // TEST - uygulama açılırken ses çal
   final player = AudioPlayer();
   await player.play(AssetSource('sounds/click.mp3'));
 
