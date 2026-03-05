@@ -4,6 +4,8 @@ import 'transaction_screen.dart';
 import 'summary_screen.dart';
 import 'about_screen.dart';
 import 'settings.dart';
+import 'package:provider/provider.dart';
+import '../providers/settings_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -15,18 +17,42 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
-  final screens = [
-    const TreeScreen(),
-    const TransactionScreen(),
-    const SummaryScreen(),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final settings = context.watch<SettingsProvider>();
+    final screens = [
+      const TreeScreen(),
+      const TransactionScreen(),
+      if (settings.aiEnabled) const SummaryScreen(),
+    ];
+
+    final destinations = [
+      const NavigationDestination(
+        icon: Icon(Icons.nature_outlined),
+        selectedIcon: Icon(Icons.nature),
+        label: 'Ağaç',
+      ),
+      const NavigationDestination(
+        icon: Icon(Icons.wallet_outlined),
+        selectedIcon: Icon(Icons.wallet),
+        label: 'Finans',
+      ),
+      if (settings.aiEnabled)
+        const NavigationDestination(
+          icon: Icon(Icons.auto_awesome_outlined),
+          selectedIcon: Icon(Icons.auto_awesome),
+          label: 'Özet',
+        ),
+    ];
+
+    final safeIndex = _currentIndex >= screens.length
+        ? screens.length - 1
+        : _currentIndex;
+
     return Scaffold(
       body: Stack(
         children: [
-          screens[_currentIndex],
+          screens[safeIndex],
           Positioned(
             top: 10,
             right: 6,
@@ -71,27 +97,11 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         child: NavigationBar(
-          selectedIndex: _currentIndex,
+          selectedIndex: safeIndex,
           onDestinationSelected: (index) {
             setState(() => _currentIndex = index);
           },
-          destinations: const [
-            NavigationDestination(
-              icon: Icon(Icons.nature_outlined),
-              selectedIcon: Icon(Icons.nature),
-              label: 'Ağaç',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.wallet_outlined),
-              selectedIcon: Icon(Icons.wallet),
-              label: 'Finans',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.auto_awesome_outlined),
-              selectedIcon: Icon(Icons.auto_awesome),
-              label: 'Özet',
-            ),
-          ],
+          destinations: destinations,
         ),
       ),
     );
