@@ -8,10 +8,8 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../providers/transaction_provider.dart';
 import '../providers/tree_provider.dart';
+import '../providers/settings_provider.dart';
 import '../models/transaction.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-
-String get _groqApiKey => dotenv.env['GROQ_API_KEY'] ?? '';
 
 // ─── Purna ───────────────────────────────────────────────────────────
 const _chartColors = [
@@ -43,6 +41,14 @@ class _SummaryScreenState extends State<SummaryScreen> {
   Future<void> _analyzeWithAI() async {
     final txProvider = context.read<TransactionProvider>();
     final treeProvider = context.read<TreeProvider>();
+    final settings = context.read<SettingsProvider>();
+
+    if (settings.groqToken.trim().isEmpty) {
+      setState(() {
+        _errorMessage = 'AI analizi için önce Ayarlar > Yapay Zeka bölümünden Groq tokeni girin.';
+      });
+      return;
+    }
 
     setState(() {
       _isLoading = true;
@@ -103,7 +109,7 @@ Başlıklar ve emoji kullanarak düzenli yaz.''';
             Uri.parse('https://api.groq.com/openai/v1/chat/completions'),
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': 'Bearer $_groqApiKey',
+              'Authorization': 'Bearer ${settings.groqToken}',
             },
             body: jsonEncode({
               'model': 'llama-3.3-70b-versatile',
