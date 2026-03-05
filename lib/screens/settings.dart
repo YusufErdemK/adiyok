@@ -24,6 +24,48 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _loadSoundSetting();
   }
 
+  void _showGroqTokenDialog(SettingsProvider settings) {
+    final controller = TextEditingController(text: settings.groqApiKey);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Groq API Token'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'console.groq.com adresinden ücretsiz token alabilirsiniz.',
+              style: TextStyle(fontSize: 13),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: controller,
+              obscureText: true,
+              decoration: const InputDecoration(
+                labelText: 'API Token',
+                border: OutlineInputBorder(),
+                hintText: 'gsk_...',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('İptal'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              settings.setGroqApiKey(controller.text.trim());
+              Navigator.pop(context);
+            },
+            child: const Text('Kaydet'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _loadSoundSetting() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -122,6 +164,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ],
             ),
+          ),
+
+          const SizedBox(height: 24),
+
+          _buildSectionTitle('Yapay Zeka'),
+          Consumer<SettingsProvider>(
+            builder: (context, settings, _) {
+              return _buildSettingCard(
+                child: Column(
+                  children: [
+                    _buildSwitchTile(
+                      icon: Icons.auto_awesome_outlined,
+                      title: 'AI Destekli Özet',
+                      subtitle: 'Groq API ile finansal analiz',
+                      value: settings.aiEnabled,
+                      onChanged: (value) {
+                        settings.setAiEnabled(value);
+                        if (value && settings.groqApiKey.isEmpty) {
+                          _showGroqTokenDialog(settings);
+                        }
+                      },
+                    ),
+                    if (settings.aiEnabled) ...[
+                      const Divider(height: 1),
+                      _buildActionTile(
+                        icon: Icons.key_outlined,
+                        title: 'Groq API Token',
+                        subtitle: settings.groqApiKey.isEmpty
+                            ? 'Token girilmedi'
+                            : '••••••••${settings.groqApiKey.length > 6 ? settings.groqApiKey.substring(settings.groqApiKey.length - 4) : ''}',
+                        onTap: () => _showGroqTokenDialog(settings),
+                      ),
+                    ],
+                  ],
+                ),
+              );
+            },
           ),
 
           const SizedBox(height: 24),
