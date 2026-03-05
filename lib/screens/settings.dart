@@ -26,6 +26,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _loadSoundSetting() async {
     final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+
     setState(() {
       _soundEnabled = prefs.getBool(_soundEnabledKey) ?? true;
     });
@@ -59,6 +61,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<String?> _showGroqTokenDialog({String initialValue = ''}) async {
+    String enteredToken = initialValue;
+
+    return showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Groq Tokeni'),
+        content: TextFormField(
+          initialValue: initialValue,
+          obscureText: true,
+          onChanged: (value) => enteredToken = value,
     final controller = TextEditingController(text: initialValue);
     final token = await showDialog<String>(
       context: context,
@@ -78,6 +90,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: const Text('İptal'),
           ),
           ElevatedButton(
+            onPressed: () => Navigator.pop(dialogContext, enteredToken),
             onPressed: () => Navigator.pop(dialogContext, controller.text),
             child: const Text('Kaydet'),
           ),
