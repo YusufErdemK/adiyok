@@ -71,6 +71,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           initialValue: initialValue,
           obscureText: true,
           onChanged: (value) => enteredToken = value,
+    final controller = TextEditingController(text: initialValue);
+    final token = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Groq Tokeni'),
+        content: TextField(
+          controller: controller,
+          obscureText: true,
           decoration: const InputDecoration(
             labelText: 'Token',
             hintText: 'gsk_... ',
@@ -83,11 +91,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(dialogContext, enteredToken),
+            onPressed: () => Navigator.pop(dialogContext, controller.text),
             child: const Text('Kaydet'),
           ),
         ],
       ),
     );
+
+    controller.dispose();
+    return token;
   }
 
   @override

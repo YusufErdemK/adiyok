@@ -45,6 +45,14 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
     ];
 
+    if (_currentIndex >= screens.length) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() => _currentIndex = screens.length - 1);
+        }
+      });
+    }
+
     final safeIndex = _currentIndex >= screens.length
         ? screens.length - 1
         : _currentIndex;
