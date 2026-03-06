@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/card_model.dart';
 
+// ── KUMBARA ───────────────────────────────────────────────────────────────────
+
 class PiggyBank {
   final String id;
   final String name;
@@ -39,21 +41,71 @@ class PiggyBank {
   );
 }
 
+// ── HESAP ─────────────────────────────────────────────────────────────────────
+
+enum AccountType {
+  cash('Nakit', '💵'),
+  debit('Banka Kartı', '💳'),
+  credit('Kredi Kartı', '💎');
+
+  final String label;
+  final String emoji;
+  const AccountType(this.label, this.emoji);
+
+  static AccountType fromString(String v) => AccountType.values.firstWhere(
+    (e) => e.name == v,
+    orElse: () => AccountType.cash,
+  );
+}
+
+class Account {
+  final String id;
+  final String name;
+  final AccountType type;
+  final String? linkedCardId; // banka/kredi kartıysa karta bağlı
+
+  Account({
+    String? id,
+    required this.name,
+    required this.type,
+    this.linkedCardId,
+  }) : id = id ?? DateTime.now().millisecondsSinceEpoch.toString();
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'name': name,
+    'type': type.name,
+    'linkedCardId': linkedCardId,
+  };
+
+  static Account fromJson(Map<String, dynamic> json) => Account(
+    id: json['id'] as String,
+    name: json['name'] as String,
+    type: AccountType.fromString(json['type'] as String),
+    linkedCardId: json['linkedCardId'] as String?,
+  );
+}
+
+// ── PROVIDER ──────────────────────────────────────────────────────────────────
+
 class WalletProvider extends ChangeNotifier {
   static const String _cardsKey = 'wallet_cards';
   static const String _manualBalanceKey = 'wallet_manual_balance';
   static const String _useManualBalanceKey = 'wallet_use_manual';
   static const String _piggyBanksKey = 'wallet_piggy_banks';
+  static const String _accountsKey = 'wallet_accounts';
 
   List<CardModel> _cards = [];
   double _manualBalance = 0;
   bool _useManualBalance = false;
   List<PiggyBank> _piggyBanks = [];
+  List<Account> _accounts = [];
 
   List<CardModel> get cards => _cards;
   double get manualBalance => _manualBalance;
   bool get useManualBalance => _useManualBalance;
   List<PiggyBank> get piggyBanks => _piggyBanks;
+  List<Account> get accounts => _accounts;
 
   WalletProvider() {
     _load();
@@ -78,6 +130,14 @@ class WalletProvider extends ChangeNotifier {
           .toList();
     }
 
+    final accountsJson = prefs.getString(_accountsKey);
+    if (accountsJson != null) {
+      final list = jsonDecode(accountsJson) as List;
+      _accounts = list
+          .map((e) => Account.fromJson(e as Map<String, dynamic>))
+          .toList();
+    }
+
     _manualBalance = prefs.getDouble(_manualBalanceKey) ?? 0;
     _useManualBalance = prefs.getBool(_useManualBalanceKey) ?? false;
     notifyListeners();
@@ -95,8 +155,13 @@ class WalletProvider extends ChangeNotifier {
       _piggyBanksKey,
       jsonEncode(_piggyBanks.map((p) => p.toJson()).toList()),
     );
+    await prefs.setString(
+      _accountsKey,
+      jsonEncode(_accounts.map((a) => a.toJson()).toList()),
+    );
   }
 
+  // ── Kart işlemleri
   Future<void> addCard(CardModel card) async {
     _cards.add(card);
     notifyListeners();
@@ -105,18 +170,17 @@ class WalletProvider extends ChangeNotifier {
 
   Future<void> removeCard(String id) async {
     _cards.removeWhere((c) => c.id == id);
-    notifyListeners();
-    await _save();
-  }
-
-  Future<void> setManualBalance(double value) async {
-    _manualBalance = value;
-    notifyListeners();
-    await _save();
-  }
-
-  Future<void> setUseManualBalance(bool value) async {
-    _useManualBalance = value;
+    // Bağlı hesaplardan da kaldır
+    for (final a in _accounts) {
+      if (a.linkedCardId == id) {
+        _accounts[_accounts.indexOf(a)] = Account(
+          id: a.id,
+          name: a.name,
+          type: a.type,
+          linkedCardId: null,
+        );
+      }
+    }
     notifyListeners();
     await _save();
   }
@@ -129,6 +193,20 @@ class WalletProvider extends ChangeNotifier {
     }
   }
 
+  // ── Bakiye işlemleri
+  Future<void> setManualBalance(double value) async {
+    _manualBalance = value;
+    notifyListeners();
+    await _save();
+  }
+
+  Future<void> setUseManualBalance(bool value) async {
+    _useManualBalance = value;
+    notifyListeners();
+    await _save();
+  }
+
+  // ── Kumbara işlemleri
   Future<void> addPiggyBank(PiggyBank piggyBank) async {
     _piggyBanks.add(piggyBank);
     notifyListeners();
@@ -156,5 +234,26 @@ class WalletProvider extends ChangeNotifier {
         .clamp(0, double.infinity);
     notifyListeners();
     await _save();
+  }
+
+  // ── Hesap işlemleri
+  Future<void> addAccount(Account account) async {
+    _accounts.add(account);
+    notifyListeners();
+    await _save();
+  }
+
+  Future<void> removeAccount(String id) async {
+    _accounts.removeWhere((a) => a.id == id);
+    notifyListeners();
+    await _save();
+  }
+
+  Account? getAccount(String id) {
+    try {
+      return _accounts.firstWhere((a) => a.id == id);
+    } catch (_) {
+      return null;
+    }
   }
 }
