@@ -48,6 +48,8 @@ class Transaction {
   final DateTime date;
   final String? description;
   final String? notes;
+  final String? cardId; // null = nakit
+  final bool isCash;
 
   Transaction({
     String? id,
@@ -60,13 +62,14 @@ class Transaction {
     DateTime? date,
     this.description,
     this.notes,
+    this.cardId,
+    this.isCash = false,
   }) : id = id ?? DateTime.now().millisecondsSinceEpoch.toString(),
        date = date ?? DateTime.now();
 
   bool get isIncome => category.isIncome;
   bool get isExpense => category.isExpense;
 
-  // Ağaç node seçildiyse onu göster, yoksa enum'u
   String get displayCategory => treeNodeName ?? category.label;
   String get displayEmoji => treeNodeName != null ? '🌳' : category.emoji;
 
@@ -81,6 +84,8 @@ class Transaction {
     DateTime? date,
     String? description,
     String? notes,
+    String? cardId,
+    bool? isCash,
   }) {
     return Transaction(
       id: id,
@@ -93,6 +98,8 @@ class Transaction {
       date: date ?? this.date,
       description: description ?? this.description,
       notes: notes ?? this.notes,
+      cardId: cardId ?? this.cardId,
+      isCash: isCash ?? this.isCash,
     );
   }
 
@@ -108,6 +115,8 @@ class Transaction {
       'date': date.toIso8601String(),
       'description': description,
       'notes': notes,
+      'cardId': cardId,
+      'isCash': isCash,
     };
   }
 
@@ -123,6 +132,8 @@ class Transaction {
       date: DateTime.parse(json['date'] as String),
       description: json['description'] as String?,
       notes: json['notes'] as String?,
+      cardId: json['cardId'] as String?,
+      isCash: json['isCash'] as bool? ?? false,
     );
   }
 
