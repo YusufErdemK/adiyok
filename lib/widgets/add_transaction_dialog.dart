@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../models/transaction.dart';
 import '../models/tree_node.dart';
+import '../models/card_model.dart';
 import '../providers/transaction_provider.dart';
 import '../providers/tree_provider.dart';
 import '../providers/wallet_provider.dart';
@@ -11,7 +12,6 @@ import 'glass_card.dart';
 
 class AddTransactionDialog extends StatefulWidget {
   final Transaction? initialTransaction;
-
   const AddTransactionDialog({Key? key, this.initialTransaction})
     : super(key: key);
 
@@ -34,48 +34,39 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
 
   String? _selectedCardId;
   bool _isCash = false;
+  String? _selectedAccountId;
 
   List<TreeNode> _flattenNodes(List<TreeNode> roots) {
     final result = <TreeNode>[];
     void traverse(TreeNode node) {
       result.add(node);
-      for (final child in node.children) {
-        traverse(child);
-      }
+      for (final child in node.children) traverse(child);
     }
 
-    for (final root in roots) {
-      traverse(root);
-    }
+    for (final root in roots) traverse(root);
     return result;
   }
 
   @override
   void initState() {
     super.initState();
-    if (widget.initialTransaction != null) {
-      _titleController = TextEditingController(
-        text: widget.initialTransaction!.title,
-      );
+    final t = widget.initialTransaction;
+    if (t != null) {
+      _titleController = TextEditingController(text: t.title);
       _amountController = TextEditingController(
-        text: widget.initialTransaction!.amount.toStringAsFixed(2),
+        text: t.amount.toStringAsFixed(2),
       );
-      _quantityController = TextEditingController(
-        text: widget.initialTransaction!.quantity.toString(),
-      );
-      _descriptionController = TextEditingController(
-        text: widget.initialTransaction!.description,
-      );
-      _notesController = TextEditingController(
-        text: widget.initialTransaction!.notes,
-      );
-      _selectedCategory = widget.initialTransaction!.category;
-      _selectedTreeNodeId = widget.initialTransaction!.treeNodeId;
-      _selectedTreeNodeName = widget.initialTransaction!.treeNodeName;
-      _selectedDate = widget.initialTransaction!.date;
-      _isIncome = widget.initialTransaction!.isIncome;
-      _selectedCardId = widget.initialTransaction!.cardId;
-      _isCash = widget.initialTransaction!.isCash;
+      _quantityController = TextEditingController(text: t.quantity.toString());
+      _descriptionController = TextEditingController(text: t.description);
+      _notesController = TextEditingController(text: t.notes);
+      _selectedCategory = t.category;
+      _selectedTreeNodeId = t.treeNodeId;
+      _selectedTreeNodeName = t.treeNodeName;
+      _selectedDate = t.date;
+      _isIncome = t.isIncome;
+      _selectedCardId = t.cardId;
+      _isCash = t.isCash;
+      _selectedAccountId = t.accountId;
     } else {
       _titleController = TextEditingController();
       _amountController = TextEditingController();
@@ -89,6 +80,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
       _isIncome = true;
       _selectedCardId = null;
       _isCash = false;
+      _selectedAccountId = null;
     }
   }
 
@@ -110,22 +102,22 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
   @override
   Widget build(BuildContext context) {
     final incomeCategories = TransactionCategory.values
-        .where((cat) => cat.isIncome)
+        .where((c) => c.isIncome)
         .toList();
     final expenseCategories = TransactionCategory.values
-        .where((cat) => cat.isExpense)
+        .where((c) => c.isExpense)
         .toList();
     final currentEnumCategories = _isIncome
         ? incomeCategories
         : expenseCategories;
     final cards = context.watch<WalletProvider>().cards;
+    final accounts = context.watch<WalletProvider>().accounts;
+    final allNodes = _flattenNodes(context.watch<TreeProvider>().roots);
 
     if (_selectedTreeNodeId == null &&
         !currentEnumCategories.contains(_selectedCategory)) {
       _selectedCategory = currentEnumCategories.first;
     }
-
-    final allNodes = _flattenNodes(context.watch<TreeProvider>().roots);
 
     return Dialog(
       insetPadding: const EdgeInsets.all(16),
@@ -159,7 +151,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
               ),
               const SizedBox(height: 24),
 
-              // Income/Expense Toggle
+              // Gelir/Gider toggle
               Row(
                 children: [
                   Expanded(
@@ -245,7 +237,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
               ),
               const SizedBox(height: 24),
 
-              // Title
+              // Başlık
               TextField(
                 controller: _titleController,
                 decoration: InputDecoration(
@@ -259,7 +251,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
               ),
               const SizedBox(height: 16),
 
-              // Amount
+              // Tutar
               TextField(
                 controller: _amountController,
                 keyboardType: const TextInputType.numberWithOptions(
@@ -276,10 +268,12 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
               ),
               const SizedBox(height: 16),
 
-              // Quantity
+              // Adet
               TextField(
                 controller: _quantityController,
-                keyboardType: TextInputType.number,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 decoration: InputDecoration(
                   labelText: 'Adet (İsteğe bağlı)',
                   hintText: '1',
@@ -379,6 +373,43 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
               ),
               const SizedBox(height: 16),
 
+              // ── Hesap seçimi
+              if (accounts.isNotEmpty) ...[
+                DropdownButtonFormField<String?>(
+                  value: _selectedAccountId,
+                  isExpanded: true,
+                  hint: const Text('Hesap seç (isteğe bağlı)'),
+                  onChanged: (v) => setState(() => _selectedAccountId = v),
+                  items: [
+                    const DropdownMenuItem(
+                      value: null,
+                      child: Text('Hesap seçilmedi'),
+                    ),
+                    ...accounts.map(
+                      (a) => DropdownMenuItem(
+                        value: a.id,
+                        child: Row(
+                          children: [
+                            Text(a.type.emoji),
+                            const SizedBox(width: 8),
+                            Text(a.name),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                  decoration: InputDecoration(
+                    labelText: 'Hesap',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    prefixIcon: const Icon(Icons.account_balance),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+
+              // ── Kart seçimi + Nakit
               Row(
                 children: [
                   Expanded(
@@ -388,9 +419,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                       hint: const Text('Kart seç'),
                       onChanged: _isCash
                           ? null
-                          : (value) {
-                              setState(() => _selectedCardId = value);
-                            },
+                          : (value) => setState(() => _selectedCardId = value),
                       items: [
                         const DropdownMenuItem(
                           value: null,
@@ -419,7 +448,6 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                     ),
                   ),
                   const SizedBox(width: 10),
-                  // Nakit checkbox
                   Column(
                     children: [
                       Checkbox(
@@ -472,7 +500,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
               ),
               const SizedBox(height: 16),
 
-              // Description
+              // Açıklama
               TextField(
                 controller: _descriptionController,
                 decoration: InputDecoration(
@@ -487,7 +515,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
               ),
               const SizedBox(height: 16),
 
-              // Notes
+              // İşletme
               TextField(
                 controller: _notesController,
                 decoration: InputDecoration(
@@ -502,7 +530,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
               ),
               const SizedBox(height: 24),
 
-              // Action Buttons
+              // Butonlar
               Row(
                 children: [
                   Expanded(
@@ -559,7 +587,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
     try {
       final amount = double.parse(_amountController.text);
       if (amount <= 0) throw Exception();
-      final quantity = int.tryParse(_quantityController.text) ?? 1;
+      final quantity = double.tryParse(_quantityController.text) ?? 1.0;
 
       final transaction = Transaction(
         id: widget.initialTransaction?.id,
@@ -578,6 +606,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
             : _notesController.text.trim(),
         cardId: _isCash ? null : _selectedCardId,
         isCash: _isCash,
+        accountId: _selectedAccountId,
       );
 
       if (widget.initialTransaction != null) {
