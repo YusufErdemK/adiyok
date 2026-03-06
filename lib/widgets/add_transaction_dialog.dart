@@ -3,8 +3,10 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../models/transaction.dart';
 import '../models/tree_node.dart';
+import '../models/card_model.dart';
 import '../providers/transaction_provider.dart';
 import '../providers/tree_provider.dart';
+import '../providers/wallet_provider.dart';
 import '../services/sound_service.dart';
 import 'glass_card.dart';
 
@@ -31,7 +33,9 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
   late DateTime _selectedDate;
   late bool _isIncome;
 
-  // Ağaçtaki tüm node'ları düz listeye çek
+  String? _selectedCardId;
+  bool _isCash = false;
+
   List<TreeNode> _flattenNodes(List<TreeNode> roots) {
     final result = <TreeNode>[];
     void traverse(TreeNode node) {
@@ -71,6 +75,8 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
       _selectedTreeNodeName = widget.initialTransaction!.treeNodeName;
       _selectedDate = widget.initialTransaction!.date;
       _isIncome = widget.initialTransaction!.isIncome;
+      _selectedCardId = widget.initialTransaction!.cardId;
+      _isCash = widget.initialTransaction!.isCash;
     } else {
       _titleController = TextEditingController();
       _amountController = TextEditingController();
@@ -82,6 +88,8 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
       _selectedTreeNodeName = null;
       _selectedDate = DateTime.now();
       _isIncome = true;
+      _selectedCardId = null;
+      _isCash = false;
     }
   }
 
@@ -95,7 +103,6 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
     super.dispose();
   }
 
-  // Dropdown value: enum için "e:salary", tree için "t:nodeId"
   String get _dropdownValue {
     if (_selectedTreeNodeId != null) return 't:$_selectedTreeNodeId';
     return 'e:${_selectedCategory.name}';
@@ -112,6 +119,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
     final currentEnumCategories = _isIncome
         ? incomeCategories
         : expenseCategories;
+    final cards = context.watch<WalletProvider>().cards;
 
     if (_selectedTreeNodeId == null &&
         !currentEnumCategories.contains(_selectedCategory)) {
@@ -151,6 +159,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                 ],
               ),
               const SizedBox(height: 24),
+
               // Income/Expense Toggle
               Row(
                 children: [
@@ -236,6 +245,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                 ],
               ),
               const SizedBox(height: 24),
+
               // Title
               TextField(
                 controller: _titleController,
@@ -249,6 +259,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                 ),
               ),
               const SizedBox(height: 16),
+
               // Amount
               TextField(
                 controller: _amountController,
@@ -265,6 +276,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                 ),
               ),
               const SizedBox(height: 16),
+
               // Quantity
               TextField(
                 controller: _quantityController,
@@ -279,7 +291,8 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                 ),
               ),
               const SizedBox(height: 16),
-              // Kategori - enum + ağaç node'ları
+
+              // Kategori
               DropdownButtonFormField<String>(
                 value: _dropdownValue,
                 isExpanded: true,
@@ -287,13 +300,11 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                   if (value == null) return;
                   setState(() {
                     if (value.startsWith('t:')) {
-                      // Ağaç node seçildi
                       final nodeId = value.substring(2);
                       final node = allNodes.firstWhere((n) => n.id == nodeId);
                       _selectedTreeNodeId = node.id;
                       _selectedTreeNodeName = node.name;
                     } else {
-                      // Enum kategori seçildi
                       _selectedTreeNodeId = null;
                       _selectedTreeNodeName = null;
                       _selectedCategory = TransactionCategory.fromString(
@@ -303,7 +314,6 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                   });
                 },
                 items: [
-                  // Standart kategoriler başlığı
                   DropdownMenuItem(
                     enabled: false,
                     value: '__enum_header__',
@@ -316,8 +326,8 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                       ),
                     ),
                   ),
-                  ...currentEnumCategories.map((cat) {
-                    return DropdownMenuItem(
+                  ...currentEnumCategories.map(
+                    (cat) => DropdownMenuItem(
                       value: 'e:${cat.name}',
                       child: Row(
                         children: [
@@ -326,9 +336,8 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                           Text(cat.label),
                         ],
                       ),
-                    );
-                  }),
-                  // Ağaç elemanları varsa göster
+                    ),
+                  ),
                   if (allNodes.isNotEmpty) ...[
                     DropdownMenuItem(
                       enabled: false,
@@ -342,8 +351,8 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                         ),
                       ),
                     ),
-                    ...allNodes.map((node) {
-                      return DropdownMenuItem(
+                    ...allNodes.map(
+                      (node) => DropdownMenuItem(
                         value: 't:${node.id}',
                         child: Row(
                           children: [
@@ -357,8 +366,8 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                             ),
                           ],
                         ),
-                      );
-                    }),
+                      ),
+                    ),
                   ],
                 ],
                 decoration: InputDecoration(
@@ -370,6 +379,64 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                 ),
               ),
               const SizedBox(height: 16),
+
+              Row(
+                children: [
+                  Expanded(
+                    child: DropdownButtonFormField<String?>(
+                      value: _isCash ? null : _selectedCardId,
+                      isExpanded: true,
+                      hint: const Text('Kart seç'),
+                      onChanged: _isCash
+                          ? null
+                          : (value) {
+                              setState(() => _selectedCardId = value);
+                            },
+                      items: [
+                        const DropdownMenuItem(
+                          value: null,
+                          child: Text('Kart seçilmedi'),
+                        ),
+                        ...cards.map(
+                          (card) => DropdownMenuItem(
+                            value: card.id,
+                            child: Row(
+                              children: [
+                                Text(card.bank.emoji),
+                                const SizedBox(width: 8),
+                                Text(card.name),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                      decoration: InputDecoration(
+                        labelText: 'Kart',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        prefixIcon: const Icon(Icons.credit_card),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  // Nakit checkbox
+                  Column(
+                    children: [
+                      Checkbox(
+                        value: _isCash,
+                        onChanged: (v) => setState(() {
+                          _isCash = v ?? false;
+                          if (_isCash) _selectedCardId = null;
+                        }),
+                      ),
+                      const Text('Nakit', style: TextStyle(fontSize: 12)),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
               // Tarih
               GestureDetector(
                 onTap: () async {
@@ -380,9 +447,8 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                     firstDate: DateTime(2000),
                     lastDate: DateTime.now().add(const Duration(days: 365)),
                   );
-                  if (selectedDate != null) {
+                  if (selectedDate != null)
                     setState(() => _selectedDate = selectedDate);
-                  }
                 },
                 child: Container(
                   padding: const EdgeInsets.symmetric(
@@ -406,6 +472,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                 ),
               ),
               const SizedBox(height: 16),
+
               // Description
               TextField(
                 controller: _descriptionController,
@@ -420,6 +487,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                 maxLines: 2,
               ),
               const SizedBox(height: 16),
+
               // Notes
               TextField(
                 controller: _notesController,
@@ -434,6 +502,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                 maxLines: 2,
               ),
               const SizedBox(height: 24),
+
               // Action Buttons
               Row(
                 children: [
@@ -508,6 +577,8 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
         notes: _notesController.text.trim().isEmpty
             ? null
             : _notesController.text.trim(),
+        cardId: _isCash ? null : _selectedCardId,
+        isCash: _isCash,
       );
 
       if (widget.initialTransaction != null) {
