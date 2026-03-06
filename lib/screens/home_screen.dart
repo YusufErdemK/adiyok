@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/settings_provider.dart';
 import 'tree_screen.dart';
 import 'transaction_screen.dart';
 import 'summary_screen.dart';
+import 'wallet_screen.dart';
 import 'about_screen.dart';
 import 'settings.dart';
-import 'package:provider/provider.dart';
-import '../providers/settings_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -20,9 +21,11 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final settings = context.watch<SettingsProvider>();
+
     final screens = [
       const TreeScreen(),
       const TransactionScreen(),
+      const WalletScreen(),
       if (settings.aiEnabled) const SummaryScreen(),
     ];
 
@@ -37,6 +40,11 @@ class _HomeScreenState extends State<HomeScreen> {
         selectedIcon: Icon(Icons.wallet),
         label: 'Finans',
       ),
+      const NavigationDestination(
+        icon: Icon(Icons.account_balance_wallet_outlined),
+        selectedIcon: Icon(Icons.account_balance_wallet),
+        label: 'Cüzdanım',
+      ),
       if (settings.aiEnabled)
         const NavigationDestination(
           icon: Icon(Icons.auto_awesome_outlined),
@@ -47,9 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (_currentIndex >= screens.length) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          setState(() => _currentIndex = screens.length - 1);
-        }
+        if (mounted) setState(() => _currentIndex = screens.length - 1);
       });
     }
 
@@ -77,16 +83,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 if (value == 1) {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => const SettingsScreen(),
-                    ),
+                    MaterialPageRoute(builder: (_) => const SettingsScreen()),
                   );
                 } else if (value == 2) {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => const AboutScreen(),
-                    ),
+                    MaterialPageRoute(builder: (_) => const AboutScreen()),
                   );
                 }
               },
@@ -106,9 +108,8 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         child: NavigationBar(
           selectedIndex: safeIndex,
-          onDestinationSelected: (index) {
-            setState(() => _currentIndex = index);
-          },
+          onDestinationSelected: (index) =>
+              setState(() => _currentIndex = index),
           destinations: destinations,
         ),
       ),
