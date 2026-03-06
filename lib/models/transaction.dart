@@ -41,15 +41,16 @@ class Transaction {
   final String id;
   final String title;
   final double amount;
-  final int quantity;
+  final double quantity;
   final TransactionCategory category;
   final String? treeNodeId;
   final String? treeNodeName;
   final DateTime date;
   final String? description;
   final String? notes;
-  final String? cardId; // null = nakit
+  final String? cardId;
   final bool isCash;
+  final String? accountId;
 
   Transaction({
     String? id,
@@ -64,6 +65,7 @@ class Transaction {
     this.notes,
     this.cardId,
     this.isCash = false,
+    this.accountId,
   }) : id = id ?? DateTime.now().millisecondsSinceEpoch.toString(),
        date = date ?? DateTime.now();
 
@@ -76,7 +78,7 @@ class Transaction {
   Transaction copyWith({
     String? title,
     double? amount,
-    int? quantity,
+    double? quantity,
     TransactionCategory? category,
     String? treeNodeId,
     String? treeNodeName,
@@ -86,6 +88,7 @@ class Transaction {
     String? notes,
     String? cardId,
     bool? isCash,
+    String? accountId,
   }) {
     return Transaction(
       id: id,
@@ -100,6 +103,7 @@ class Transaction {
       notes: notes ?? this.notes,
       cardId: cardId ?? this.cardId,
       isCash: isCash ?? this.isCash,
+      accountId: accountId ?? this.accountId,
     );
   }
 
@@ -117,6 +121,7 @@ class Transaction {
       'notes': notes,
       'cardId': cardId,
       'isCash': isCash,
+      'accountId': accountId,
     };
   }
 
@@ -125,7 +130,7 @@ class Transaction {
       id: json['id'] as String,
       title: json['title'] as String,
       amount: (json['amount'] as num).toDouble(),
-      quantity: (json['quantity'] as int?) ?? 1,
+      quantity: (json['quantity'] as num?)?.toDouble() ?? 1.0,
       category: TransactionCategory.fromString(json['category'] as String),
       treeNodeId: json['treeNodeId'] as String?,
       treeNodeName: json['treeNodeName'] as String?,
@@ -134,6 +139,7 @@ class Transaction {
       notes: json['notes'] as String?,
       cardId: json['cardId'] as String?,
       isCash: json['isCash'] as bool? ?? false,
+      accountId: json['accountId'] as String?,
     );
   }
 
