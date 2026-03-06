@@ -7,6 +7,7 @@ import 'services/storage_service.dart';
 import 'providers/tree_provider.dart';
 import 'providers/transaction_provider.dart';
 import 'providers/settings_provider.dart';
+import 'providers/wallet_provider.dart';
 import 'screens/home_screen.dart';
 
 void main() async {
@@ -35,6 +36,7 @@ class MyApp extends StatelessWidget {
             return TransactionProvider(treeProvider: treeProvider);
           },
         ),
+        ChangeNotifierProvider(create: (_) => WalletProvider()),
       ],
       child: Consumer<SettingsProvider>(
         builder: (context, settings, _) {
