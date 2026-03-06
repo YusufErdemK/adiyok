@@ -3,7 +3,6 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../models/transaction.dart';
 import '../models/tree_node.dart';
-import '../models/card_model.dart';
 import '../providers/transaction_provider.dart';
 import '../providers/tree_provider.dart';
 import '../providers/wallet_provider.dart';
