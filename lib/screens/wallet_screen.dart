@@ -18,7 +18,7 @@ class _WalletScreenState extends State<WalletScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
   }
 
   @override
@@ -35,16 +35,24 @@ class _WalletScreenState extends State<WalletScreen>
         centerTitle: true,
         bottom: TabBar(
           controller: _tabController,
+          isScrollable: true,
+          tabAlignment: TabAlignment.start,
           tabs: const [
             Tab(icon: Icon(Icons.account_balance_wallet), text: 'Bakiye'),
             Tab(icon: Icon(Icons.credit_card), text: 'Kartlarım'),
+            Tab(icon: Icon(Icons.account_balance), text: 'Hesaplar'),
             Tab(icon: Icon(Icons.savings), text: 'Kumbara'),
           ],
         ),
       ),
       body: TabBarView(
         controller: _tabController,
-        children: const [_BalanceTab(), _CardsTab(), _PiggyBankTab()],
+        children: const [
+          _BalanceTab(),
+          _CardsTab(),
+          _AccountsTab(),
+          _PiggyBankTab(),
+        ],
       ),
     );
   }
@@ -133,9 +141,7 @@ class _BalanceTabState extends State<_BalanceTab> {
               ),
             ),
           ),
-
           const SizedBox(height: 20),
-
           Card(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(14),
@@ -227,7 +233,10 @@ class _CardsTab extends StatelessWidget {
 
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showAddCardDialog(context),
+        onPressed: () => showDialog(
+          context: context,
+          builder: (_) => const _AddCardDialog(),
+        ),
         icon: const Icon(Icons.add),
         label: const Text('Kart Ekle'),
       ),
@@ -262,22 +271,16 @@ class _CardsTab extends StatelessWidget {
             ),
     );
   }
-
-  void _showAddCardDialog(BuildContext context) {
-    showDialog(context: context, builder: (_) => const _AddCardDialog());
-  }
 }
 
 class _CardTile extends StatelessWidget {
   final CardModel card;
   final double totalExpense;
-
   const _CardTile({required this.card, required this.totalExpense});
 
   @override
   Widget build(BuildContext context) {
     final wallet = context.read<WalletProvider>();
-
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -358,6 +361,371 @@ class _CardTile extends StatelessWidget {
   }
 }
 
+// ── HESAPLAR SEKMESİ ──────────────────────────────────────────────────────────
+
+class _AccountsTab extends StatelessWidget {
+  const _AccountsTab();
+
+  @override
+  Widget build(BuildContext context) {
+    final wallet = context.watch<WalletProvider>();
+    final txProvider = context.watch<TransactionProvider>();
+
+    return Scaffold(
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => showDialog(
+          context: context,
+          builder: (_) => const _AddAccountDialog(),
+        ),
+        icon: const Icon(Icons.add),
+        label: const Text('Hesap Ekle'),
+      ),
+      body: wallet.accounts.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.account_balance,
+                    size: 64,
+                    color: Colors.grey[300],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Henüz hesap eklenmedi',
+                    style: TextStyle(color: Colors.grey[500], fontSize: 16),
+                  ),
+                ],
+              ),
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
+              itemCount: wallet.accounts.length,
+              itemBuilder: (context, i) {
+                final account = wallet.accounts[i];
+                final linkedCard = account.linkedCardId != null
+                    ? wallet.getCard(account.linkedCardId!)
+                    : null;
+                // Bu hesaba ait işlemler (accountId üzerinden)
+                final accountTx = txProvider.transactions
+                    .where((t) => t.accountId == account.id)
+                    .toList();
+                final totalExpense = accountTx
+                    .where((t) => t.isExpense)
+                    .fold(0.0, (s, t) => s + t.amount * t.quantity);
+                final totalIncome = accountTx
+                    .where((t) => t.isIncome)
+                    .fold(0.0, (s, t) => s + t.amount * t.quantity);
+                return _AccountTile(
+                  account: account,
+                  linkedCard: linkedCard,
+                  totalExpense: totalExpense,
+                  totalIncome: totalIncome,
+                );
+              },
+            ),
+    );
+  }
+}
+
+class _AccountTile extends StatelessWidget {
+  final Account account;
+  final CardModel? linkedCard;
+  final double totalExpense;
+  final double totalIncome;
+
+  const _AccountTile({
+    required this.account,
+    required this.linkedCard,
+    required this.totalExpense,
+    required this.totalIncome,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final wallet = context.read<WalletProvider>();
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: colorScheme.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Center(
+                    child: Text(
+                      linkedCard != null
+                          ? linkedCard!.bank.emoji
+                          : account.type.emoji,
+                      style: const TextStyle(fontSize: 24),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        account.name,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
+                      Text(
+                        account.type.label,
+                        style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                      ),
+                      if (linkedCard != null)
+                        Text(
+                          '🔗 ${linkedCard!.name}',
+                          style: TextStyle(
+                            color: colorScheme.primary,
+                            fontSize: 12,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    color: Colors.red,
+                    size: 20,
+                  ),
+                  onPressed: () => wallet.removeAccount(account.id),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _MiniStat(
+                    label: 'Gelir',
+                    value: totalIncome,
+                    color: Colors.green,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _MiniStat(
+                    label: 'Gider',
+                    value: totalExpense,
+                    color: Colors.red,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _MiniStat(
+                    label: 'Net',
+                    value: totalIncome - totalExpense,
+                    color: totalIncome >= totalExpense
+                        ? Colors.green
+                        : Colors.orange,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MiniStat extends StatelessWidget {
+  final String label;
+  final double value;
+  final Color color;
+  const _MiniStat({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: TextStyle(fontSize: 10, color: Colors.grey[600])),
+          Text(
+            '${value.toStringAsFixed(0)} ₺',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── HESAP EKLEME DİALOGU ─────────────────────────────────────────────────────
+
+class _AddAccountDialog extends StatefulWidget {
+  const _AddAccountDialog();
+
+  @override
+  State<_AddAccountDialog> createState() => _AddAccountDialogState();
+}
+
+class _AddAccountDialogState extends State<_AddAccountDialog> {
+  final _nameController = TextEditingController();
+  AccountType _selectedType = AccountType.cash;
+  String? _selectedCardId;
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final wallet = context.watch<WalletProvider>();
+    final needsCard =
+        _selectedType == AccountType.debit ||
+        _selectedType == AccountType.credit;
+    final filteredCards = _selectedType == AccountType.credit
+        ? wallet.cards.where((c) => c.isCredit).toList()
+        : _selectedType == AccountType.debit
+        ? wallet.cards.where((c) => !c.isCredit).toList()
+        : <CardModel>[];
+
+    return AlertDialog(
+      title: const Text('Hesap Ekle'),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _nameController,
+              decoration: InputDecoration(
+                labelText: 'Hesap Adı',
+                hintText: 'Örn: Ana Hesabım',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<AccountType>(
+              value: _selectedType,
+              decoration: InputDecoration(
+                labelText: 'Hesap Türü',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              items: AccountType.values
+                  .map(
+                    (t) => DropdownMenuItem(
+                      value: t,
+                      child: Row(
+                        children: [
+                          Text(t.emoji),
+                          const SizedBox(width: 8),
+                          Text(t.label),
+                        ],
+                      ),
+                    ),
+                  )
+                  .toList(),
+              onChanged: (v) => setState(() {
+                _selectedType = v!;
+                _selectedCardId = null;
+              }),
+            ),
+            if (needsCard) ...[
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String?>(
+                value: _selectedCardId,
+                hint: const Text('Karta bağla (isteğe bağlı)'),
+                decoration: InputDecoration(
+                  labelText: 'Bağlı Kart',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                items: [
+                  const DropdownMenuItem(
+                    value: null,
+                    child: Text('Kart seçme'),
+                  ),
+                  ...filteredCards.map(
+                    (c) => DropdownMenuItem(
+                      value: c.id,
+                      child: Row(
+                        children: [
+                          Text(c.bank.emoji),
+                          const SizedBox(width: 8),
+                          Text(c.name),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+                onChanged: (v) => setState(() => _selectedCardId = v),
+              ),
+              if (filteredCards.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    'Önce Kartlarım sekmesinden kart ekleyin.',
+                    style: TextStyle(fontSize: 11, color: Colors.orange[700]),
+                  ),
+                ),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('İptal'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            if (_nameController.text.trim().isEmpty) return;
+            context.read<WalletProvider>().addAccount(
+              Account(
+                name: _nameController.text.trim(),
+                type: _selectedType,
+                linkedCardId: _selectedCardId,
+              ),
+            );
+            Navigator.pop(context);
+          },
+          child: const Text('Ekle'),
+        ),
+      ],
+    );
+  }
+}
+
 // ── KUMBARA SEKMESİ ───────────────────────────────────────────────────────────
 
 class _PiggyBankTab extends StatelessWidget {
@@ -369,7 +737,10 @@ class _PiggyBankTab extends StatelessWidget {
 
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showAddPiggyDialog(context),
+        onPressed: () => showDialog(
+          context: context,
+          builder: (_) => const _AddPiggyBankDialog(),
+        ),
         icon: const Icon(Icons.add),
         label: const Text('Kumbara Ekle'),
       ),
@@ -395,15 +766,10 @@ class _PiggyBankTab extends StatelessWidget {
             ),
     );
   }
-
-  void _showAddPiggyDialog(BuildContext context) {
-    showDialog(context: context, builder: (_) => const _AddPiggyBankDialog());
-  }
 }
 
 class _PiggyBankTile extends StatelessWidget {
   final PiggyBank piggyBank;
-
   const _PiggyBankTile({required this.piggyBank});
 
   @override
@@ -527,11 +893,10 @@ class _PiggyBankTile extends StatelessWidget {
             onPressed: () {
               final val = double.tryParse(controller.text);
               if (val != null && val > 0) {
-                if (isAdding) {
+                if (isAdding)
                   wallet.addToPiggyBank(piggyBank.id, val);
-                } else {
+                else
                   wallet.removeFromPiggyBank(piggyBank.id, val);
-                }
                 Navigator.pop(context);
               }
             },
@@ -547,7 +912,6 @@ class _PiggyBankTile extends StatelessWidget {
 
 class _AddPiggyBankDialog extends StatefulWidget {
   const _AddPiggyBankDialog();
-
   @override
   State<_AddPiggyBankDialog> createState() => _AddPiggyBankDialogState();
 }
@@ -556,7 +920,6 @@ class _AddPiggyBankDialogState extends State<_AddPiggyBankDialog> {
   final _nameController = TextEditingController();
   final _targetController = TextEditingController();
   String _selectedEmoji = '🐷';
-
   final _emojis = ['🐷', '🎯', '🏠', '✈️', '🚗', '💍', '📱', '💻', '🎓', '💰'];
 
   @override
@@ -666,7 +1029,6 @@ class _AddPiggyBankDialogState extends State<_AddPiggyBankDialog> {
 
 class _AddCardDialog extends StatefulWidget {
   const _AddCardDialog();
-
   @override
   State<_AddCardDialog> createState() => _AddCardDialogState();
 }
