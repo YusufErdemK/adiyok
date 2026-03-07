@@ -233,9 +233,15 @@ Başlıklar ve emoji kullanarak düzenli yaz.''';
           ],
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [_buildChartsTab(txProvider), const _CalendarTab()],
+      body: Column(
+        children: [
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [_buildChartsTab(txProvider), const _CalendarTab()],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -798,8 +804,6 @@ Başlıklar ve emoji kullanarak düzenli yaz.''';
 
 // ─── TAKVİM SEKMESİ ───────────────────────────────────────────────────────────
 
-// ─── TAKVİM SEKMESİ ───────────────────────────────────────────────────────────
-
 class _CalendarTab extends StatefulWidget {
   const _CalendarTab();
 
@@ -808,25 +812,115 @@ class _CalendarTab extends StatefulWidget {
 }
 
 class _CalendarTabState extends State<_CalendarTab> {
-  DateTime _focusedMonth = DateTime.now();
-  DateTime? _selectedDay;
+  DateTime _focusedMonth = DateTime(DateTime.now().year, DateTime.now().month);
+
+  void _showDaySheet(
+    BuildContext context,
+    DateTime day,
+    List<Transaction> txList,
+  ) {
+    final dayTx =
+        txList
+            .where(
+              (t) =>
+                  t.date.year == day.year &&
+                  t.date.month == day.month &&
+                  t.date.day == day.day,
+            )
+            .toList()
+          ..sort((a, b) => b.date.compareTo(a.date));
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        final colorScheme = Theme.of(context).colorScheme;
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Handle
+              Center(
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Text(
+                    DateFormat('d MMMM yyyy', 'tr_TR').format(day),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  if (dayTx.isNotEmpty)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colorScheme.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '${dayTx.length} işlem',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: colorScheme.primary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              if (dayTx.isEmpty)
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 24),
+                    child: Text(
+                      'Bu gün işlem yok',
+                      style: TextStyle(color: Colors.grey[400], fontSize: 14),
+                    ),
+                  ),
+                )
+              else
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 320),
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: dayTx.length,
+                    separatorBuilder: (_, __) =>
+                        Divider(height: 1, color: Colors.grey[100]),
+                    itemBuilder: (context, i) => _TxRow(transaction: dayTx[i]),
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final txProvider = context.watch<TransactionProvider>();
     final transactions = txProvider.transactions;
     final colorScheme = Theme.of(context).colorScheme;
-
-    final selectedTx = _selectedDay == null
-        ? <Transaction>[]
-        : transactions
-              .where(
-                (t) =>
-                    t.date.year == _selectedDay!.year &&
-                    t.date.month == _selectedDay!.month &&
-                    t.date.day == _selectedDay!.day,
-              )
-              .toList();
+    final today = DateTime.now();
 
     final activeDays = transactions
         .where(
@@ -837,8 +931,29 @@ class _CalendarTabState extends State<_CalendarTab> {
         .map((t) => t.date.day)
         .toSet();
 
+    // Ay özeti
+    final monthTx = transactions.where(
+      (t) =>
+          t.date.year == _focusedMonth.year &&
+          t.date.month == _focusedMonth.month,
+    );
+    final monthIncome = monthTx
+        .where((t) => t.isIncome)
+        .fold(0.0, (s, t) => s + t.amount * t.quantity);
+    final monthExpense = monthTx
+        .where((t) => t.isExpense)
+        .fold(0.0, (s, t) => s + t.amount * t.quantity);
+
+    final firstDay = DateTime(_focusedMonth.year, _focusedMonth.month, 1);
+    final daysInMonth = DateTime(
+      _focusedMonth.year,
+      _focusedMonth.month + 1,
+      0,
+    ).day;
+    final startOffset = (firstDay.weekday - 1) % 7;
+
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -847,34 +962,37 @@ class _CalendarTabState extends State<_CalendarTab> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               IconButton(
-                icon: const Icon(Icons.chevron_left),
+                icon: const Icon(Icons.chevron_left, size: 18),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
                 onPressed: () => setState(() {
                   _focusedMonth = DateTime(
                     _focusedMonth.year,
                     _focusedMonth.month - 1,
                   );
-                  _selectedDay = null;
                 }),
               ),
               Text(
                 DateFormat('MMMM yyyy', 'tr_TR').format(_focusedMonth),
                 style: const TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.chevron_right),
+                icon: const Icon(Icons.chevron_right, size: 18),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
                 onPressed: () => setState(() {
                   _focusedMonth = DateTime(
                     _focusedMonth.year,
                     _focusedMonth.month + 1,
                   );
-                  _selectedDay = null;
                 }),
               ),
             ],
           ),
+          const SizedBox(height: 10),
 
           // ── Gün başlıkları
           Row(
@@ -885,9 +1003,9 @@ class _CalendarTabState extends State<_CalendarTab> {
                       child: Text(
                         d,
                         style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey[500],
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey[400],
                         ),
                       ),
                     ),
@@ -898,192 +1016,271 @@ class _CalendarTabState extends State<_CalendarTab> {
           const SizedBox(height: 4),
 
           // ── Takvim grid
-          _buildCalendarGrid(activeDays, colorScheme),
+          GridView.count(
+            crossAxisCount: 7,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            childAspectRatio: 1.1,
+            children: [
+              for (int i = 0; i < startOffset; i++) const SizedBox(),
+              for (int day = 1; day <= daysInMonth; day++)
+                Builder(
+                  builder: (context) {
+                    final date = DateTime(
+                      _focusedMonth.year,
+                      _focusedMonth.month,
+                      day,
+                    );
+                    final isToday =
+                        date.year == today.year &&
+                        date.month == today.month &&
+                        date.day == today.day;
+                    final hasActivity = activeDays.contains(day);
 
-          const Divider(height: 32),
+                    return GestureDetector(
+                      onTap: () => _showDaySheet(context, date, transactions),
+                      child: Container(
+                        margin: const EdgeInsets.all(1),
+                        decoration: BoxDecoration(
+                          color: isToday
+                              ? colorScheme.primary
+                              : hasActivity
+                              ? colorScheme.primary.withValues(alpha: 0.08)
+                              : null,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Text(
+                              '$day',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: isToday
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                                color: isToday ? Colors.white : null,
+                              ),
+                            ),
+                            if (hasActivity && !isToday)
+                              Positioned(
+                                bottom: 5,
+                                child: Container(
+                                  width: 3,
+                                  height: 3,
+                                  decoration: BoxDecoration(
+                                    color: colorScheme.primary,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+            ],
+          ),
 
-          // ── Seçili günün başlığı
-          if (_selectedDay == null)
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 24),
-                child: Text(
-                  'Bir gün seçin',
-                  style: TextStyle(color: Colors.grey[400], fontSize: 15),
+          const SizedBox(height: 16),
+          Divider(color: Colors.grey[200]),
+          const SizedBox(height: 12),
+
+          // ── Ay özeti
+          Row(
+            children: [
+              Expanded(
+                child: _MonthStat(
+                  label: 'Gelir',
+                  value: monthIncome,
+                  color: const Color(0xFF34C759),
                 ),
               ),
-            )
-          else if (selectedTx.isEmpty)
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.event_busy, size: 48, color: Colors.grey[300]),
-                    const SizedBox(height: 8),
-                    Text(
-                      DateFormat('d MMMM', 'tr_TR').format(_selectedDay!),
-                      style: TextStyle(color: Colors.grey[500], fontSize: 14),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Bu gün işlem yok',
-                      style: TextStyle(color: Colors.grey[400], fontSize: 13),
-                    ),
-                  ],
+              const SizedBox(width: 10),
+              Expanded(
+                child: _MonthStat(
+                  label: 'Gider',
+                  value: monthExpense,
+                  color: const Color(0xFFFF3B30),
                 ),
               ),
-            )
-          else ...[
+              const SizedBox(width: 10),
+              Expanded(
+                child: _MonthStat(
+                  label: 'Net',
+                  value: monthIncome - monthExpense,
+                  color: monthIncome >= monthExpense
+                      ? const Color(0xFF34C759)
+                      : const Color(0xFFFF3B30),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 20),
+
+          // ── O ayın işlem listesi (tarih gruplu)
+          if (activeDays.isNotEmpty) ...[
             Text(
-              DateFormat('d MMMM yyyy', 'tr_TR').format(_selectedDay!),
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+              'Bu Aydaki İşlemler',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[500],
+              ),
             ),
-            const SizedBox(height: 12),
-            ...selectedTx.map((t) => _DayTransactionTile(transaction: t)),
+            const SizedBox(height: 8),
+            ...(() {
+              final grouped = <int, List<Transaction>>{};
+              for (final t in transactions.where(
+                (t) =>
+                    t.date.year == _focusedMonth.year &&
+                    t.date.month == _focusedMonth.month,
+              )) {
+                grouped.putIfAbsent(t.date.day, () => []).add(t);
+              }
+              final sortedDays = grouped.keys.toList()
+                ..sort((a, b) => b.compareTo(a));
+
+              return sortedDays.map((day) {
+                final dayTx = grouped[day]!
+                  ..sort((a, b) => b.date.compareTo(a.date));
+                final date = DateTime(
+                  _focusedMonth.year,
+                  _focusedMonth.month,
+                  day,
+                );
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Text(
+                        DateFormat('d MMMM, EEEE', 'tr_TR').format(date),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey[400],
+                        ),
+                      ),
+                    ),
+                    Card(
+                      margin: EdgeInsets.zero,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .surfaceContainerHighest
+                          .withValues(alpha: 0.4),
+                      child: Column(
+                        children: [
+                          for (int i = 0; i < dayTx.length; i++) ...[
+                            _TxRow(transaction: dayTx[i]),
+                            if (i < dayTx.length - 1)
+                              Divider(
+                                height: 1,
+                                color: Colors.grey[200],
+                                indent: 52,
+                              ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                );
+              }).toList();
+            })(),
           ],
         ],
       ),
     );
   }
+}
 
-  Widget _buildCalendarGrid(Set<int> activeDays, ColorScheme colorScheme) {
-    final firstDay = DateTime(_focusedMonth.year, _focusedMonth.month, 1);
-    final daysInMonth = DateTime(
-      _focusedMonth.year,
-      _focusedMonth.month + 1,
-      0,
-    ).day;
-    final startOffset = (firstDay.weekday - 1) % 7;
-    final today = DateTime.now();
+class _MonthStat extends StatelessWidget {
+  final String label;
+  final double value;
+  final Color color;
+  const _MonthStat({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
 
-    final cells = <Widget>[];
-    for (int i = 0; i < startOffset; i++) {
-      cells.add(const SizedBox());
-    }
-    for (int day = 1; day <= daysInMonth; day++) {
-      final date = DateTime(_focusedMonth.year, _focusedMonth.month, day);
-      final isToday =
-          date.year == today.year &&
-          date.month == today.month &&
-          date.day == today.day;
-      final isSelected =
-          _selectedDay != null &&
-          date.year == _selectedDay!.year &&
-          date.month == _selectedDay!.month &&
-          date.day == _selectedDay!.day;
-      final hasActivity = activeDays.contains(day);
-
-      cells.add(
-        GestureDetector(
-          onTap: () => setState(() => _selectedDay = date),
-          child: Container(
-            margin: const EdgeInsets.all(2),
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? colorScheme.primary
-                  : isToday
-                  ? colorScheme.primary.withValues(alpha: 0.12)
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Text(
-                  '$day',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: isToday || isSelected
-                        ? FontWeight.bold
-                        : FontWeight.normal,
-                    color: isSelected
-                        ? colorScheme.onPrimary
-                        : isToday
-                        ? colorScheme.primary
-                        : null,
-                  ),
-                ),
-                if (hasActivity && !isSelected)
-                  Positioned(
-                    bottom: 3,
-                    child: Container(
-                      width: 4,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: colorScheme.primary,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
-              ],
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: TextStyle(fontSize: 11, color: Colors.grey[500])),
+          const SizedBox(height: 2),
+          Text(
+            '${value.toStringAsFixed(0)} ₺',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+              color: color,
             ),
           ),
-        ),
-      );
-    }
-
-    return GridView.count(
-      crossAxisCount: 7,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      childAspectRatio: 1,
-      children: cells,
+        ],
+      ),
     );
   }
 }
 
-class _DayTransactionTile extends StatelessWidget {
+class _TxRow extends StatelessWidget {
   final Transaction transaction;
-  const _DayTransactionTile({required this.transaction});
+  const _TxRow({required this.transaction});
 
   @override
   Widget build(BuildContext context) {
     final isIncome = transaction.isIncome;
-    final color = isIncome ? Colors.green : Colors.red;
+    final color = isIncome ? const Color(0xFF34C759) : const Color(0xFFFF3B30);
     final total = transaction.amount * transaction.quantity;
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        child: Row(
-          children: [
-            Text(
-              transaction.displayEmoji,
-              style: const TextStyle(fontSize: 22),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    transaction.title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      child: Row(
+        children: [
+          Text(transaction.displayEmoji, style: const TextStyle(fontSize: 18)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  transaction.title,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
                   ),
-                  Text(
-                    transaction.displayCategory,
-                    style: TextStyle(color: Colors.grey[500], fontSize: 12),
-                  ),
-                ],
-              ),
+                ),
+                Text(
+                  transaction.displayCategory,
+                  style: TextStyle(fontSize: 11, color: Colors.grey[400]),
+                ),
+              ],
             ),
-            Text(
-              '${isIncome ? '+' : '-'}${total.toStringAsFixed(2)} ₺',
-              style: TextStyle(
-                color: color,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-              ),
+          ),
+          Text(
+            '${isIncome ? '+' : '−'}${total.toStringAsFixed(2)} ₺',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: color,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
