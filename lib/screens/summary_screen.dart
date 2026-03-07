@@ -43,7 +43,7 @@ class _SummaryScreenState extends State<SummaryScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -230,6 +230,7 @@ Başlıklar ve emoji kullanarak düzenli yaz.''';
           tabs: const [
             Tab(icon: Icon(Icons.bar_chart), text: 'Grafikler'),
             Tab(icon: Icon(Icons.calendar_month), text: 'Takvim'),
+            Tab(icon: Icon(Icons.store_outlined), text: 'İşletmeler'),
           ],
         ),
       ),
@@ -238,7 +239,11 @@ Başlıklar ve emoji kullanarak düzenli yaz.''';
           Expanded(
             child: TabBarView(
               controller: _tabController,
-              children: [_buildChartsTab(txProvider), const _CalendarTab()],
+              children: [
+                _buildChartsTab(txProvider),
+                const _CalendarTab(),
+                const _BusinessTab(),
+              ],
             ),
           ),
         ],
@@ -1381,6 +1386,286 @@ class _StatCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ─── İŞLETMELER SEKMESİ ──────────────────────────────────────────────────────
+
+class _BusinessTab extends StatelessWidget {
+  const _BusinessTab();
+
+  @override
+  Widget build(BuildContext context) {
+    final transactions = context.watch<TransactionProvider>().transactions;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    // İşletme bazlı grupla
+    final grouped = <String, List<Transaction>>{};
+    for (final t in transactions) {
+      final business = (t.notes?.trim().isNotEmpty == true)
+          ? t.notes!.trim()
+          : '— İşletme Belirtilmemiş';
+      grouped.putIfAbsent(business, () => []).add(t);
+    }
+
+    // Toplam harcamaya göre sırala (belirtilmemiş en sona)
+    final sortedKeys = grouped.keys.toList()
+      ..sort((a, b) {
+        if (a == '— İşletme Belirtilmemiş') return 1;
+        if (b == '— İşletme Belirtilmemiş') return -1;
+        final totalA = grouped[a]!.fold(
+          0.0,
+          (s, t) => s + t.amount * t.quantity,
+        );
+        final totalB = grouped[b]!.fold(
+          0.0,
+          (s, t) => s + t.amount * t.quantity,
+        );
+        return totalB.compareTo(totalA);
+      });
+
+    if (transactions.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.store_outlined,
+              size: 48,
+              color: colorScheme.onSurface.withValues(alpha: 0.2),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Henüz işlem yok',
+              style: TextStyle(
+                color: colorScheme.onSurface.withValues(alpha: 0.4),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+      itemCount: sortedKeys.length,
+      itemBuilder: (context, i) {
+        final business = sortedKeys[i];
+        final txList = grouped[business]!
+          ..sort((a, b) => b.date.compareTo(a.date));
+        final totalExpense = txList
+            .where((t) => t.isExpense)
+            .fold(0.0, (s, t) => s + t.amount * t.quantity);
+        final totalIncome = txList
+            .where((t) => t.isIncome)
+            .fold(0.0, (s, t) => s + t.amount * t.quantity);
+        final isUnlabeled = business == '— İşletme Belirtilmemiş';
+
+        return _BusinessCard(
+          business: business,
+          transactions: txList,
+          totalExpense: totalExpense,
+          totalIncome: totalIncome,
+          isUnlabeled: isUnlabeled,
+        );
+      },
+    );
+  }
+}
+
+class _BusinessCard extends StatefulWidget {
+  final String business;
+  final List<Transaction> transactions;
+  final double totalExpense;
+  final double totalIncome;
+  final bool isUnlabeled;
+
+  const _BusinessCard({
+    required this.business,
+    required this.transactions,
+    required this.totalExpense,
+    required this.totalIncome,
+    required this.isUnlabeled,
+  });
+
+  @override
+  State<_BusinessCard> createState() => _BusinessCardState();
+}
+
+class _BusinessCardState extends State<_BusinessCard> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    const expenseColor = Color(0xFFFF3B30);
+    const incomeColor = Color(0xFF34C759);
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 10),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      elevation: 0,
+      color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+      child: Column(
+        children: [
+          // ── Başlık satırı
+          InkWell(
+            onTap: () => setState(() => _expanded = !_expanded),
+            borderRadius: BorderRadius.circular(14),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              child: Row(
+                children: [
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: widget.isUnlabeled
+                          ? colorScheme.onSurface.withValues(alpha: 0.06)
+                          : colorScheme.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Center(
+                      child: Text(
+                        widget.isUnlabeled ? '❓' : '🏪',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.business,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                            color: widget.isUnlabeled
+                                ? colorScheme.onSurface.withValues(alpha: 0.5)
+                                : null,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${widget.transactions.length} işlem',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: colorScheme.onSurface.withValues(alpha: 0.4),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      if (widget.totalExpense > 0)
+                        Text(
+                          '−${widget.totalExpense.toStringAsFixed(0)} ₺',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: expenseColor,
+                          ),
+                        ),
+                      if (widget.totalIncome > 0)
+                        Text(
+                          '+${widget.totalIncome.toStringAsFixed(0)} ₺',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: incomeColor,
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(width: 6),
+                  Icon(
+                    _expanded ? Icons.expand_less : Icons.expand_more,
+                    size: 18,
+                    color: colorScheme.onSurface.withValues(alpha: 0.4),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // ── Açılır işlem listesi
+          if (_expanded) ...[
+            Divider(
+              height: 1,
+              color: colorScheme.onSurface.withValues(alpha: 0.08),
+              indent: 16,
+            ),
+            ...widget.transactions.asMap().entries.map((entry) {
+              final t = entry.value;
+              final isIncome = t.isIncome;
+              final color = isIncome ? incomeColor : expenseColor;
+              final total = t.amount * t.quantity;
+              return Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
+                    child: Row(
+                      children: [
+                        Text(
+                          t.displayEmoji,
+                          style: const TextStyle(fontSize: 18),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                t.title,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              Text(
+                                '${t.displayCategory} · ${DateFormat('d MMM', 'tr_TR').format(t.date)}',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: colorScheme.onSurface.withValues(
+                                    alpha: 0.4,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Text(
+                          '${isIncome ? '+' : '−'}${total.toStringAsFixed(2)} ₺',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: color,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (entry.key < widget.transactions.length - 1)
+                    Divider(
+                      height: 1,
+                      color: colorScheme.onSurface.withValues(alpha: 0.06),
+                      indent: 52,
+                    ),
+                ],
+              );
+            }).toList(),
+            const SizedBox(height: 4),
+          ],
+        ],
       ),
     );
   }
