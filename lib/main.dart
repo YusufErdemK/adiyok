@@ -30,12 +30,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
         ChangeNotifierProvider(create: (_) => TreeProvider()),
-        ChangeNotifierProvider(
-          create: (context) {
-            final treeProvider = context.read<TreeProvider>();
-            return TransactionProvider(treeProvider: treeProvider);
-          },
-        ),
+        ChangeNotifierProvider(create: (_) => TransactionProvider()),
         ChangeNotifierProvider(create: (_) => WalletProvider()),
       ],
       child: Consumer<SettingsProvider>(

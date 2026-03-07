@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import '../models/transaction.dart';
 import '../services/storage_service.dart';
-import 'tree_provider.dart';
 
 class TransactionProvider extends ChangeNotifier {
   final List<Transaction> _transactions = [];
-  final TreeProvider? _treeProvider;
   bool _isLoading = true;
 
-  TransactionProvider({TreeProvider? treeProvider})
-    : _treeProvider = treeProvider {
+  TransactionProvider() {
     _initializeTransactions();
   }
 

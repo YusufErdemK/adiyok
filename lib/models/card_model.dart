@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 enum BankName {
   ziraat('Ziraat Bankası', '🏦'),
   garanti('Garanti BBVA', '🟢'),
