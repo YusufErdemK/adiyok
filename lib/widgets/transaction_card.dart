@@ -19,20 +19,23 @@ class TransactionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isIncome = transaction.isIncome;
-    final amountColor = isIncome ? Colors.green[600] : Colors.red[600];
-    final iconColor = isIncome ? Colors.green[400] : Colors.red[400];
-    final backgroundColor = isIncome ? Colors.green[50] : Colors.red[50];
+    final amountColor = isIncome
+        ? const Color(0xFF34C759)
+        : const Color(0xFFFF3B30);
+    final iconColor = isIncome
+        ? const Color(0xFF34C759)
+        : const Color(0xFFFF3B30);
     final totalAmount = transaction.amount * transaction.quantity;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return GlassCard(
-      backgroundColor: backgroundColor?.withAlpha(100),
+      backgroundColor: iconColor.withValues(alpha: 0.07),
       child: Row(
         children: [
-          // Icon/Category
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: iconColor?.withAlpha(50),
+              color: iconColor.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
@@ -41,7 +44,6 @@ class TransactionCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 16),
-          // Content
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -66,7 +68,11 @@ class TransactionCard extends StatelessWidget {
                                 ? '${transaction.displayCategory} · ${transaction.quantity} adet'
                                 : transaction.displayCategory,
                             style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(color: Colors.grey[600]),
+                                ?.copyWith(
+                                  color: colorScheme.onSurface.withValues(
+                                    alpha: 0.5,
+                                  ),
+                                ),
                           ),
                         ],
                       ),
@@ -88,7 +94,9 @@ class TransactionCard extends StatelessWidget {
                             '₺${transaction.amount.toStringAsFixed(2)} × ${transaction.quantity}',
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(
-                                  color: Colors.grey[500],
+                                  color: colorScheme.onSurface.withValues(
+                                    alpha: 0.4,
+                                  ),
                                   fontSize: 11,
                                 ),
                           ),
@@ -98,7 +106,12 @@ class TransactionCard extends StatelessWidget {
                             'tr_TR',
                           ).format(transaction.date),
                           style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: Colors.grey[500], fontSize: 11),
+                              ?.copyWith(
+                                color: colorScheme.onSurface.withValues(
+                                  alpha: 0.4,
+                                ),
+                                fontSize: 11,
+                              ),
                         ),
                       ],
                     ),
@@ -108,9 +121,9 @@ class TransactionCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     transaction.description!,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurface.withValues(alpha: 0.5),
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -119,7 +132,6 @@ class TransactionCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          // Action Buttons
           PopupMenuButton<String>(
             onSelected: (value) {
               if (value == 'delete') {

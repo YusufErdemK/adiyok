@@ -113,6 +113,10 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
     final cards = context.watch<WalletProvider>().cards;
     final accounts = context.watch<WalletProvider>().accounts;
     final allNodes = _flattenNodes(context.watch<TreeProvider>().roots);
+    final colorScheme = Theme.of(context).colorScheme;
+
+    const incomeColor = Color(0xFF34C759);
+    const expenseColor = Color(0xFFFF3B30);
 
     if (_selectedTreeNodeId == null &&
         !currentEnumCategories.contains(_selectedCategory)) {
@@ -128,7 +132,6 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -151,7 +154,6 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
               ),
               const SizedBox(height: 24),
 
-              // Gelir/Gider toggle
               Row(
                 children: [
                   Expanded(
@@ -169,13 +171,13 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
                           color: _isIncome
-                              ? Colors.green[100]
+                              ? incomeColor.withValues(alpha: 0.15)
                               : Colors.transparent,
                           borderRadius: BorderRadius.circular(22),
                           border: Border.all(
                             color: _isIncome
-                                ? Colors.green[400]!
-                                : Colors.grey[300]!,
+                                ? incomeColor
+                                : colorScheme.outline.withValues(alpha: 0.4),
                             width: 2,
                           ),
                         ),
@@ -185,8 +187,10 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
                               color: _isIncome
-                                  ? Colors.green[700]
-                                  : Colors.grey[600],
+                                  ? incomeColor
+                                  : colorScheme.onSurface.withValues(
+                                      alpha: 0.5,
+                                    ),
                             ),
                           ),
                         ),
@@ -209,13 +213,13 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
                           color: !_isIncome
-                              ? Colors.red[100]
+                              ? expenseColor.withValues(alpha: 0.15)
                               : Colors.transparent,
                           borderRadius: BorderRadius.circular(22),
                           border: Border.all(
                             color: !_isIncome
-                                ? Colors.red[400]!
-                                : Colors.grey[300]!,
+                                ? expenseColor
+                                : colorScheme.outline.withValues(alpha: 0.4),
                             width: 2,
                           ),
                         ),
@@ -225,8 +229,10 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
                               color: !_isIncome
-                                  ? Colors.red[700]
-                                  : Colors.grey[600],
+                                  ? expenseColor
+                                  : colorScheme.onSurface.withValues(
+                                      alpha: 0.5,
+                                    ),
                             ),
                           ),
                         ),
@@ -237,7 +243,6 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
               ),
               const SizedBox(height: 24),
 
-              // Başlık
               TextField(
                 controller: _titleController,
                 decoration: InputDecoration(
@@ -251,7 +256,6 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
               ),
               const SizedBox(height: 16),
 
-              // Tutar
               TextField(
                 controller: _amountController,
                 keyboardType: const TextInputType.numberWithOptions(
@@ -268,7 +272,6 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
               ),
               const SizedBox(height: 16),
 
-              // Adet
               TextField(
                 controller: _quantityController,
                 keyboardType: const TextInputType.numberWithOptions(
@@ -285,7 +288,6 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
               ),
               const SizedBox(height: 16),
 
-              // Kategori
               DropdownButtonFormField<String>(
                 value: _dropdownValue,
                 isExpanded: true,
@@ -315,7 +317,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
-                        color: Theme.of(context).primaryColor,
+                        color: colorScheme.primary,
                       ),
                     ),
                   ),
@@ -340,7 +342,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
-                          color: Theme.of(context).primaryColor,
+                          color: colorScheme.primary,
                         ),
                       ),
                     ),
@@ -373,7 +375,6 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
               ),
               const SizedBox(height: 16),
 
-              // ── Hesap seçimi
               if (accounts.isNotEmpty) ...[
                 DropdownButtonFormField<String?>(
                   value: _selectedAccountId,
@@ -409,7 +410,6 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                 const SizedBox(height: 16),
               ],
 
-              // ── Kart seçimi + Nakit
               Row(
                 children: [
                   Expanded(
@@ -464,7 +464,6 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
               ),
               const SizedBox(height: 16),
 
-              // Tarih
               GestureDetector(
                 onTap: () async {
                   SoundService.playClick();
@@ -483,12 +482,17 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                     vertical: 16,
                   ),
                   decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey[400]!),
+                    border: Border.all(
+                      color: colorScheme.outline.withValues(alpha: 0.5),
+                    ),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.calendar_today, color: Colors.grey[600]),
+                      Icon(
+                        Icons.calendar_today,
+                        color: colorScheme.onSurface.withValues(alpha: 0.5),
+                      ),
                       const SizedBox(width: 12),
                       Text(
                         DateFormat('dd.MM.yyyy', 'tr_TR').format(_selectedDate),
@@ -500,7 +504,6 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
               ),
               const SizedBox(height: 16),
 
-              // Açıklama
               TextField(
                 controller: _descriptionController,
                 decoration: InputDecoration(
@@ -515,7 +518,6 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
               ),
               const SizedBox(height: 16),
 
-              // İşletme
               TextField(
                 controller: _notesController,
                 decoration: InputDecoration(
@@ -530,23 +532,18 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
               ),
               const SizedBox(height: 24),
 
-              // Butonlar
               Row(
                 children: [
                   Expanded(
-                    child: ElevatedButton(
+                    child: OutlinedButton(
                       onPressed: () {
                         SoundService.playClick();
                         Navigator.pop(context);
                       },
-                      style: ElevatedButton.styleFrom(
+                      style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        backgroundColor: Colors.grey[300],
                       ),
-                      child: Text(
-                        'İptal',
-                        style: TextStyle(color: Colors.grey[800]),
-                      ),
+                      child: const Text('İptal'),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -583,7 +580,6 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
       ).showSnackBar(const SnackBar(content: Text('Lütfen tutar girin')));
       return;
     }
-
     try {
       final amount = double.parse(_amountController.text);
       if (amount <= 0) throw Exception();

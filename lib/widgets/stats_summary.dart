@@ -13,31 +13,30 @@ class StatsSummary extends StatelessWidget {
         final totalIncome = provider.totalIncome;
         final totalExpense = provider.totalExpense;
         final netIncome = provider.netIncome;
+        final colorScheme = Theme.of(context).colorScheme;
+        final incomeColor = const Color(0xFF34C759);
+        final expenseColor = const Color(0xFFFF3B30);
+        final netColor = netIncome >= 0 ? incomeColor : expenseColor;
 
         return Column(
           children: [
-            // Net Income (Highlighted)
             GlassCard(
-              backgroundColor: netIncome >= 0
-                  ? Colors.green[50]?.withAlpha(150)
-                  : Colors.red[50]?.withAlpha(150),
+              backgroundColor: netColor.withValues(alpha: 0.08),
               padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
                   Text(
                     'Net Gelir',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     '${netIncome >= 0 ? '+' : ''}₺${netIncome.toStringAsFixed(2)}',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: netIncome >= 0
-                          ? Colors.green[700]
-                          : Colors.red[700],
+                      color: netColor,
                     ),
                   ),
                 ],
@@ -48,7 +47,7 @@ class StatsSummary extends StatelessWidget {
               children: [
                 Expanded(
                   child: GlassCard(
-                    backgroundColor: Colors.green[50]?.withAlpha(100),
+                    backgroundColor: incomeColor.withValues(alpha: 0.07),
                     child: Column(
                       children: [
                         Row(
@@ -56,12 +55,12 @@ class StatsSummary extends StatelessWidget {
                             Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: Colors.green[100],
+                                color: incomeColor.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Icon(
                                 Icons.trending_up,
-                                color: Colors.green[700],
+                                color: incomeColor,
                                 size: 20,
                               ),
                             ),
@@ -73,7 +72,10 @@ class StatsSummary extends StatelessWidget {
                                   Text(
                                     'Toplam Gelir',
                                     style: Theme.of(context).textTheme.bodySmall
-                                        ?.copyWith(color: Colors.grey[600]),
+                                        ?.copyWith(
+                                          color: colorScheme.onSurface
+                                              .withValues(alpha: 0.5),
+                                        ),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
@@ -83,7 +85,7 @@ class StatsSummary extends StatelessWidget {
                                         .titleSmall
                                         ?.copyWith(
                                           fontWeight: FontWeight.bold,
-                                          color: Colors.green[700],
+                                          color: incomeColor,
                                         ),
                                   ),
                                 ],
@@ -95,7 +97,12 @@ class StatsSummary extends StatelessWidget {
                         Text(
                           '${provider.incomes.length} işlem',
                           style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: Colors.grey[500], fontSize: 11),
+                              ?.copyWith(
+                                color: colorScheme.onSurface.withValues(
+                                  alpha: 0.4,
+                                ),
+                                fontSize: 11,
+                              ),
                         ),
                       ],
                     ),
@@ -104,7 +111,7 @@ class StatsSummary extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: GlassCard(
-                    backgroundColor: Colors.red[50]?.withAlpha(100),
+                    backgroundColor: expenseColor.withValues(alpha: 0.07),
                     child: Column(
                       children: [
                         Row(
@@ -112,12 +119,12 @@ class StatsSummary extends StatelessWidget {
                             Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: Colors.red[100],
+                                color: expenseColor.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Icon(
                                 Icons.trending_down,
-                                color: Colors.red[700],
+                                color: expenseColor,
                                 size: 20,
                               ),
                             ),
@@ -129,7 +136,10 @@ class StatsSummary extends StatelessWidget {
                                   Text(
                                     'Toplam Gider',
                                     style: Theme.of(context).textTheme.bodySmall
-                                        ?.copyWith(color: Colors.grey[600]),
+                                        ?.copyWith(
+                                          color: colorScheme.onSurface
+                                              .withValues(alpha: 0.5),
+                                        ),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
@@ -139,7 +149,7 @@ class StatsSummary extends StatelessWidget {
                                         .titleSmall
                                         ?.copyWith(
                                           fontWeight: FontWeight.bold,
-                                          color: Colors.red[700],
+                                          color: expenseColor,
                                         ),
                                   ),
                                 ],
@@ -151,7 +161,12 @@ class StatsSummary extends StatelessWidget {
                         Text(
                           '${provider.expenses.length} işlem',
                           style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: Colors.grey[500], fontSize: 11),
+                              ?.copyWith(
+                                color: colorScheme.onSurface.withValues(
+                                  alpha: 0.4,
+                                ),
+                                fontSize: 11,
+                              ),
                         ),
                       ],
                     ),
