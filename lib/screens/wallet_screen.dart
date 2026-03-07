@@ -56,7 +56,7 @@ class _WalletScreenState extends State<WalletScreen>
   }
 }
 
-// ── BAKİYE SEKMESI ────────────────────────────────────────────────────────────
+// ── BAKİYE SEKMESİ ────────────────────────────────────────────────────────────
 
 class _BalanceTab extends StatefulWidget {
   const _BalanceTab();
@@ -368,6 +368,7 @@ class _AccountsTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final wallet = context.watch<WalletProvider>();
     final txProvider = context.watch<TransactionProvider>();
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
@@ -378,7 +379,7 @@ class _AccountsTab extends StatelessWidget {
         icon: const Icon(Icons.add),
         label: const Text('Hesap Ekle'),
       ),
-      body: wallet.accounts.isEmpty
+      body: wallet.rootAccounts.isEmpty
           ? Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -386,159 +387,261 @@ class _AccountsTab extends StatelessWidget {
                   Icon(
                     Icons.account_balance,
                     size: 64,
-                    color: Colors.grey[300],
+                    color: colorScheme.onSurface.withValues(alpha: 0.2),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'Henüz hesap eklenmedi',
-                    style: TextStyle(color: Colors.grey[500], fontSize: 16),
+                    style: TextStyle(
+                      color: colorScheme.onSurface.withValues(alpha: 0.4),
+                      fontSize: 16,
+                    ),
                   ),
                 ],
               ),
             )
           : ListView.builder(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
-              itemCount: wallet.accounts.length,
-              itemBuilder: (context, i) {
-                final account = wallet.accounts[i];
-                final linkedCard = account.linkedCardId != null
-                    ? wallet.getCard(account.linkedCardId!)
-                    : null;
-                // Bu hesaba ait işlemler (accountId üzerinden)
-                final accountTx = txProvider.transactions
-                    .where((t) => t.accountId == account.id)
-                    .toList();
-                final totalExpense = accountTx
-                    .where((t) => t.isExpense)
-                    .fold(0.0, (s, t) => s + t.amount * t.quantity);
-                final totalIncome = accountTx
-                    .where((t) => t.isIncome)
-                    .fold(0.0, (s, t) => s + t.amount * t.quantity);
-                return _AccountTile(
-                  account: account,
-                  linkedCard: linkedCard,
-                  totalExpense: totalExpense,
-                  totalIncome: totalIncome,
-                );
-              },
+              itemCount: wallet.rootAccounts.length,
+              itemBuilder: (context, i) => _AccountNode(
+                account: wallet.rootAccounts[i],
+                depth: 0,
+                transactions: txProvider.transactions,
+              ),
             ),
     );
   }
 }
 
-class _AccountTile extends StatelessWidget {
+class _AccountNode extends StatefulWidget {
   final Account account;
-  final CardModel? linkedCard;
-  final double totalExpense;
-  final double totalIncome;
+  final int depth;
+  final List<dynamic> transactions;
 
-  const _AccountTile({
+  const _AccountNode({
     required this.account,
-    required this.linkedCard,
-    required this.totalExpense,
-    required this.totalIncome,
+    required this.depth,
+    required this.transactions,
   });
 
   @override
+  State<_AccountNode> createState() => _AccountNodeState();
+}
+
+class _AccountNodeState extends State<_AccountNode> {
+  bool _expanded = false;
+
+  @override
   Widget build(BuildContext context) {
-    final wallet = context.read<WalletProvider>();
+    final wallet = context.watch<WalletProvider>();
+    final children = wallet.childrenOf(widget.account.id);
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: colorScheme.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Center(
-                    child: Text(
-                      linkedCard != null
-                          ? linkedCard!.bank.emoji
-                          : account.type.emoji,
-                      style: const TextStyle(fontSize: 24),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+    final accountTx = widget.transactions
+        .where((t) => t.accountId == widget.account.id)
+        .toList();
+    final totalExpense = accountTx
+        .where((t) => t.isExpense)
+        .fold(0.0, (s, t) => s + t.amount * t.quantity);
+    final totalIncome = accountTx
+        .where((t) => t.isIncome)
+        .fold(0.0, (s, t) => s + t.amount * t.quantity);
+
+    final linkedCard = widget.account.linkedCardId != null
+        ? wallet.getCard(widget.account.linkedCardId!)
+        : null;
+
+    return Padding(
+      padding: EdgeInsets.only(left: widget.depth * 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Card(
+            margin: const EdgeInsets.only(bottom: 8),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
                     children: [
-                      Text(
-                        account.name,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                        ),
-                      ),
-                      Text(
-                        account.type.label,
-                        style: TextStyle(color: Colors.grey[600], fontSize: 13),
-                      ),
-                      if (linkedCard != null)
-                        Text(
-                          '🔗 ${linkedCard!.name}',
-                          style: TextStyle(
+                      if (children.isNotEmpty)
+                        GestureDetector(
+                          onTap: () => setState(() => _expanded = !_expanded),
+                          child: Icon(
+                            _expanded ? Icons.expand_less : Icons.expand_more,
+                            size: 20,
                             color: colorScheme.primary,
-                            fontSize: 12,
+                          ),
+                        )
+                      else if (widget.depth > 0)
+                        const SizedBox(width: 20),
+                      if (children.isNotEmpty || widget.depth > 0)
+                        const SizedBox(width: 4),
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: colorScheme.primary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Center(
+                          child: Text(
+                            linkedCard != null
+                                ? linkedCard.bank.emoji
+                                : widget.account.type.emoji,
+                            style: const TextStyle(fontSize: 20),
                           ),
                         ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.account.name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                            Text(
+                              widget.account.type.label,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: colorScheme.onSurface.withValues(
+                                  alpha: 0.5,
+                                ),
+                              ),
+                            ),
+                            if (linkedCard != null)
+                              Text(
+                                '🔗 ${linkedCard.name}',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: colorScheme.primary,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      PopupMenuButton<String>(
+                        icon: Icon(
+                          Icons.more_vert,
+                          size: 18,
+                          color: colorScheme.onSurface.withValues(alpha: 0.4),
+                        ),
+                        onSelected: (value) {
+                          if (value == 'add_child') {
+                            showDialog(
+                              context: context,
+                              builder: (_) => _AddAccountDialog(
+                                parentId: widget.account.id,
+                              ),
+                            );
+                          } else if (value == 'delete') {
+                            final error = wallet.canRemoveAccount(
+                              widget.account.id,
+                              widget.transactions,
+                            );
+                            if (error != null) {
+                              showDialog(
+                                context: context,
+                                builder: (_) => AlertDialog(
+                                  title: const Text('Silinemez'),
+                                  content: Text(error),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text('Tamam'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            } else {
+                              wallet.removeAccount(widget.account.id);
+                            }
+                          }
+                        },
+                        itemBuilder: (_) => [
+                          const PopupMenuItem(
+                            value: 'add_child',
+                            child: Row(
+                              children: [
+                                Icon(Icons.add, size: 16),
+                                SizedBox(width: 8),
+                                Text('Alt Hesap Ekle'),
+                              ],
+                            ),
+                          ),
+                          const PopupMenuItem(
+                            value: 'delete',
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.delete_outline,
+                                  size: 16,
+                                  color: Colors.red,
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Sil',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
-                ),
-                IconButton(
-                  icon: const Icon(
-                    Icons.delete_outline,
-                    color: Colors.red,
-                    size: 20,
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _MiniStat(
+                          label: 'Gelir',
+                          value: totalIncome,
+                          color: const Color(0xFF34C759),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _MiniStat(
+                          label: 'Gider',
+                          value: totalExpense,
+                          color: const Color(0xFFFF3B30),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _MiniStat(
+                          label: 'Net',
+                          value: totalIncome - totalExpense,
+                          color: totalIncome >= totalExpense
+                              ? const Color(0xFF34C759)
+                              : const Color(0xFFFF3B30),
+                        ),
+                      ),
+                    ],
                   ),
-                  onPressed: () => wallet.removeAccount(account.id),
-                ),
-              ],
+                ],
+              ),
             ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: _MiniStat(
-                    label: 'Gelir',
-                    value: totalIncome,
-                    color: Colors.green,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _MiniStat(
-                    label: 'Gider',
-                    value: totalExpense,
-                    color: Colors.red,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _MiniStat(
-                    label: 'Net',
-                    value: totalIncome - totalExpense,
-                    color: totalIncome >= totalExpense
-                        ? Colors.green
-                        : Colors.orange,
-                  ),
-                ),
-              ],
+          ),
+          if (_expanded && children.isNotEmpty)
+            ...children.map(
+              (child) => _AccountNode(
+                account: child,
+                depth: widget.depth + 1,
+                transactions: widget.transactions,
+              ),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -565,7 +668,15 @@ class _MiniStat extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: TextStyle(fontSize: 10, color: Colors.grey[600])),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 10,
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.5),
+            ),
+          ),
           Text(
             '${value.toStringAsFixed(0)} ₺',
             style: TextStyle(
@@ -583,7 +694,8 @@ class _MiniStat extends StatelessWidget {
 // ── HESAP EKLEME DİALOGU ─────────────────────────────────────────────────────
 
 class _AddAccountDialog extends StatefulWidget {
-  const _AddAccountDialog();
+  final String? parentId;
+  const _AddAccountDialog({this.parentId});
 
   @override
   State<_AddAccountDialog> createState() => _AddAccountDialogState();
@@ -591,7 +703,7 @@ class _AddAccountDialog extends StatefulWidget {
 
 class _AddAccountDialogState extends State<_AddAccountDialog> {
   final _nameController = TextEditingController();
-  AccountType _selectedType = AccountType.cash;
+  AccountType _selectedType = AccountType.bank;
   String? _selectedCardId;
 
   @override
@@ -603,24 +715,41 @@ class _AddAccountDialogState extends State<_AddAccountDialog> {
   @override
   Widget build(BuildContext context) {
     final wallet = context.watch<WalletProvider>();
-    final needsCard =
-        _selectedType == AccountType.debit ||
-        _selectedType == AccountType.credit;
-    final filteredCards = _selectedType == AccountType.credit
-        ? wallet.cards.where((c) => c.isCredit).toList()
-        : _selectedType == AccountType.debit
-        ? wallet.cards.where((c) => !c.isCredit).toList()
-        : <CardModel>[];
+    final colorScheme = Theme.of(context).colorScheme;
 
     return AlertDialog(
-      title: const Text('Hesap Ekle'),
+      title: Text(widget.parentId != null ? 'Alt Hesap Ekle' : 'Hesap Ekle'),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (widget.parentId != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.account_tree,
+                      size: 14,
+                      color: colorScheme.primary,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        '${wallet.getAccount(widget.parentId!)?.name ?? ''} altına eklenecek',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             TextField(
               controller: _nameController,
+              autofocus: true,
               decoration: InputDecoration(
                 labelText: 'Hesap Adı',
                 hintText: 'Örn: Ana Hesabım',
@@ -657,13 +786,12 @@ class _AddAccountDialogState extends State<_AddAccountDialog> {
                 _selectedCardId = null;
               }),
             ),
-            if (needsCard) ...[
+            if (wallet.cards.isNotEmpty) ...[
               const SizedBox(height: 12),
               DropdownButtonFormField<String?>(
                 value: _selectedCardId,
-                hint: const Text('Karta bağla (isteğe bağlı)'),
                 decoration: InputDecoration(
-                  labelText: 'Bağlı Kart',
+                  labelText: 'Karta Bağla (isteğe bağlı)',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -673,7 +801,7 @@ class _AddAccountDialogState extends State<_AddAccountDialog> {
                     value: null,
                     child: Text('Kart seçme'),
                   ),
-                  ...filteredCards.map(
+                  ...wallet.cards.map(
                     (c) => DropdownMenuItem(
                       value: c.id,
                       child: Row(
@@ -688,14 +816,6 @@ class _AddAccountDialogState extends State<_AddAccountDialog> {
                 ],
                 onChanged: (v) => setState(() => _selectedCardId = v),
               ),
-              if (filteredCards.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Text(
-                    'Önce Kartlarım sekmesinden kart ekleyin.',
-                    style: TextStyle(fontSize: 11, color: Colors.orange[700]),
-                  ),
-                ),
             ],
           ],
         ),
@@ -713,6 +833,7 @@ class _AddAccountDialogState extends State<_AddAccountDialog> {
                 name: _nameController.text.trim(),
                 type: _selectedType,
                 linkedCardId: _selectedCardId,
+                parentId: widget.parentId,
               ),
             );
             Navigator.pop(context);
@@ -910,6 +1031,7 @@ class _PiggyBankTile extends StatelessWidget {
 
 class _AddPiggyBankDialog extends StatefulWidget {
   const _AddPiggyBankDialog();
+
   @override
   State<_AddPiggyBankDialog> createState() => _AddPiggyBankDialogState();
 }
@@ -1023,10 +1145,11 @@ class _AddPiggyBankDialogState extends State<_AddPiggyBankDialog> {
   }
 }
 
-// ── KART EKLEME DİALOGU ───────────────────────────────────────────────────────
+// ── KART EKLEME DİALOGU ──────────────────────────────────────────────────────
 
 class _AddCardDialog extends StatefulWidget {
   const _AddCardDialog();
+
   @override
   State<_AddCardDialog> createState() => _AddCardDialogState();
 }

@@ -45,8 +45,10 @@ class PiggyBank {
 
 enum AccountType {
   cash('Nakit', '💵'),
-  debit('Banka Kartı', '💳'),
-  credit('Kredi Kartı', '💎');
+  bank('Banka Hesabı', '🏦'),
+  credit('Kredi Kartı', '💳'),
+  prepaid('Ön Ödemeli Kart', '💜'),
+  gift('Hediye Kartı', '🎁');
 
   final String label;
   final String emoji;
@@ -62,27 +64,46 @@ class Account {
   final String id;
   final String name;
   final AccountType type;
-  final String? linkedCardId; // banka/kredi kartıysa karta bağlı
+  final String? linkedCardId;
+  final String? parentId;
 
   Account({
     String? id,
     required this.name,
     required this.type,
     this.linkedCardId,
-  }) : id = id ?? DateTime.now().millisecondsSinceEpoch.toString();
+    this.parentId,
+  }) : id = id ?? '${DateTime.now().millisecondsSinceEpoch}';
 
   Map<String, dynamic> toJson() => {
     'id': id,
     'name': name,
     'type': type.name,
     'linkedCardId': linkedCardId,
+    'parentId': parentId,
   };
 
   static Account fromJson(Map<String, dynamic> json) => Account(
     id: json['id'] as String,
     name: json['name'] as String,
-    type: AccountType.fromString(json['type'] as String),
+    type: AccountType.fromString(json['type'] as String? ?? 'cash'),
     linkedCardId: json['linkedCardId'] as String?,
+    parentId: json['parentId'] as String?,
+  );
+
+  Account copyWith({
+    String? name,
+    AccountType? type,
+    String? linkedCardId,
+    String? parentId,
+    bool clearLinkedCard = false,
+    bool clearParent = false,
+  }) => Account(
+    id: id,
+    name: name ?? this.name,
+    type: type ?? this.type,
+    linkedCardId: clearLinkedCard ? null : (linkedCardId ?? this.linkedCardId),
+    parentId: clearParent ? null : (parentId ?? this.parentId),
   );
 }
 
@@ -106,6 +127,12 @@ class WalletProvider extends ChangeNotifier {
   bool get useManualBalance => _useManualBalance;
   List<PiggyBank> get piggyBanks => _piggyBanks;
   List<Account> get accounts => _accounts;
+
+  List<Account> get rootAccounts =>
+      _accounts.where((a) => a.parentId == null).toList();
+
+  List<Account> childrenOf(String parentId) =>
+      _accounts.where((a) => a.parentId == parentId).toList();
 
   WalletProvider() {
     _load();
@@ -170,15 +197,9 @@ class WalletProvider extends ChangeNotifier {
 
   Future<void> removeCard(String id) async {
     _cards.removeWhere((c) => c.id == id);
-    // Bağlı hesaplardan da kaldır
-    for (final a in _accounts) {
-      if (a.linkedCardId == id) {
-        _accounts[_accounts.indexOf(a)] = Account(
-          id: a.id,
-          name: a.name,
-          type: a.type,
-          linkedCardId: null,
-        );
+    for (int i = 0; i < _accounts.length; i++) {
+      if (_accounts[i].linkedCardId == id) {
+        _accounts[i] = _accounts[i].copyWith(clearLinkedCard: true);
       }
     }
     notifyListeners();
@@ -241,6 +262,18 @@ class WalletProvider extends ChangeNotifier {
     _accounts.add(account);
     notifyListeners();
     await _save();
+  }
+
+  /// Silme engeli kontrolü — hata mesajı döner, yoksa null
+  String? canRemoveAccount(String id, List<dynamic> transactions) {
+    if (childrenOf(id).isNotEmpty) {
+      return 'Bu hesabın alt hesapları var.\nÖnce alt hesapları silin.';
+    }
+    final hasTx = transactions.any((t) => t.accountId == id);
+    if (hasTx) {
+      return 'Bu hesaba bağlı işlemler var.\nHesap silinemez.';
+    }
+    return null;
   }
 
   Future<void> removeAccount(String id) async {
