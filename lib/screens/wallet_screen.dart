@@ -35,8 +35,6 @@ class _WalletScreenState extends State<WalletScreen>
         centerTitle: true,
         bottom: TabBar(
           controller: _tabController,
-          isScrollable: true,
-          tabAlignment: TabAlignment.start,
           tabs: const [
             Tab(icon: Icon(Icons.account_balance_wallet), text: 'Bakiye'),
             Tab(icon: Icon(Icons.credit_card), text: 'Kartlarım'),
