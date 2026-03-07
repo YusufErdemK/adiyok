@@ -115,6 +115,18 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
     final allNodes = _flattenNodes(context.watch<TreeProvider>().roots);
     final colorScheme = Theme.of(context).colorScheme;
 
+    // Mevcut işletmeleri topla (autocomplete için)
+    final allBusinesses =
+        context
+            .watch<TransactionProvider>()
+            .transactions
+            .map((t) => t.notes)
+            .where((n) => n != null && n.trim().isNotEmpty)
+            .map((n) => n!.trim())
+            .toSet()
+            .toList()
+          ..sort();
+
     const incomeColor = Color(0xFF34C759);
     const expenseColor = Color(0xFFFF3B30);
 
@@ -154,6 +166,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
               ),
               const SizedBox(height: 24),
 
+              // Gelir/Gider toggle
               Row(
                 children: [
                   Expanded(
@@ -518,17 +531,98 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
               ),
               const SizedBox(height: 16),
 
-              TextField(
-                controller: _notesController,
-                decoration: InputDecoration(
-                  labelText: 'İşletme (İsteğe bağlı)',
-                  hintText: 'Örn: Migros, Emlakçı vb.',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  prefixIcon: const Icon(Icons.note),
-                ),
-                maxLines: 2,
+              // ── İşletme alanı — Autocomplete
+              Autocomplete<String>(
+                initialValue: TextEditingValue(text: _notesController.text),
+                optionsBuilder: (textEditingValue) {
+                  final query = textEditingValue.text.trim().toLowerCase();
+                  if (query.isEmpty) return const [];
+                  return allBusinesses.where(
+                    (b) => b.toLowerCase().contains(query),
+                  );
+                },
+                onSelected: (value) {
+                  _notesController.text = value;
+                },
+                fieldViewBuilder:
+                    (context, controller, focusNode, onFieldSubmitted) {
+                      // Sync with _notesController
+                      controller.text = _notesController.text;
+                      controller.addListener(
+                        () => _notesController.text = controller.text,
+                      );
+                      return TextField(
+                        controller: controller,
+                        focusNode: focusNode,
+                        decoration: InputDecoration(
+                          labelText: 'İşletme (İsteğe bağlı)',
+                          hintText: 'Örn: Migros, Starbucks...',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          prefixIcon: const Icon(Icons.store_outlined),
+                          suffixIcon: allBusinesses.isNotEmpty
+                              ? Icon(
+                                  Icons.expand_more,
+                                  color: colorScheme.onSurface.withValues(
+                                    alpha: 0.4,
+                                  ),
+                                )
+                              : null,
+                        ),
+                      );
+                    },
+                optionsViewBuilder: (context, onSelected, options) {
+                  return Align(
+                    alignment: Alignment.topLeft,
+                    child: Material(
+                      elevation: 4,
+                      borderRadius: BorderRadius.circular(12),
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(
+                          maxHeight: 200,
+                          maxWidth: 400,
+                        ),
+                        child: ListView.separated(
+                          shrinkWrap: true,
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          itemCount: options.length,
+                          separatorBuilder: (_, __) =>
+                              Divider(height: 1, color: Colors.grey[100]),
+                          itemBuilder: (context, i) {
+                            final option = options.elementAt(i);
+                            return InkWell(
+                              onTap: () => onSelected(option),
+                              borderRadius: BorderRadius.circular(8),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.store_outlined,
+                                      size: 16,
+                                      color: colorScheme.onSurface.withValues(
+                                        alpha: 0.4,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Text(
+                                      option,
+                                      style: const TextStyle(fontSize: 14),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 24),
 
