@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/transaction.dart';
 import '../providers/transaction_provider.dart';
+import '../providers/bill_provider.dart';
 import '../widgets/add_transaction_dialog.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/stats_summary.dart';
 import '../widgets/transaction_card.dart';
+import 'bills_tab.dart';
 
 class TransactionScreen extends StatefulWidget {
   const TransactionScreen({Key? key}) : super(key: key);
@@ -21,7 +23,7 @@ class _TransactionScreenState extends State<TransactionScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
   }
 
   @override
@@ -32,6 +34,8 @@ class _TransactionScreenState extends State<TransactionScreen>
 
   @override
   Widget build(BuildContext context) {
+    final unpaidCount = context.watch<BillProvider>().unpaidCountThisMonth;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('💰 Gelir & Gider'),
@@ -41,25 +45,59 @@ class _TransactionScreenState extends State<TransactionScreen>
         foregroundColor: Theme.of(context).primaryColor,
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(text: 'Tümü'),
-            Tab(text: '💰 Gelir'),
-            Tab(text: '💸 Gider'),
+          tabs: [
+            const Tab(text: 'Tümü'),
+            const Tab(text: '💰 Gelir'),
+            const Tab(text: '💸 Gider'),
+            Tab(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('🧾 Faturalar'),
+                  if (unpaidCount > 0) ...[
+                    const SizedBox(width: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 5,
+                        vertical: 1,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFF3B30),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        '$unpaidCount',
+                        style: const TextStyle(
+                          fontSize: 10,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
           ],
           labelColor: Theme.of(context).primaryColor,
           unselectedLabelColor: Colors.grey[600],
           indicatorColor: Theme.of(context).primaryColor,
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          showDialog(
-            context: context,
-            builder: (context) => const AddTransactionDialog(),
-          );
-        },
-        icon: const Icon(Icons.add),
-        label: const Text('İşlem Ekle'),
+      floatingActionButton: AnimatedBuilder(
+        animation: _tabController,
+        builder: (context, _) => _tabController.index == 3
+            ? const SizedBox.shrink()
+            : FloatingActionButton.extended(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => const AddTransactionDialog(),
+                  );
+                },
+                icon: const Icon(Icons.add),
+                label: const Text('İşlem Ekle'),
+              ),
       ),
       body: TabBarView(
         controller: _tabController,
@@ -67,6 +105,7 @@ class _TransactionScreenState extends State<TransactionScreen>
           _buildAllTransactionsTab(),
           _buildIncomeTab(),
           _buildExpenseTab(),
+          const BillsTab(),
         ],
       ),
     );
@@ -82,10 +121,8 @@ class _TransactionScreenState extends State<TransactionScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Stats Summary
               const StatsSummary(),
               const SizedBox(height: 24),
-              // Transactions List
               if (transactions.isEmpty)
                 Center(
                   child: Column(
@@ -171,7 +208,6 @@ class _TransactionScreenState extends State<TransactionScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Income Summary
               GlassCard(
                 backgroundColor: Colors.green[50]?.withAlpha(150),
                 padding: const EdgeInsets.all(20),
@@ -203,7 +239,6 @@ class _TransactionScreenState extends State<TransactionScreen>
                 ),
               ),
               const SizedBox(height: 24),
-              // Category Breakdown
               if (incomes.isNotEmpty) ...[
                 Text(
                   'Kategoriler',
@@ -215,7 +250,6 @@ class _TransactionScreenState extends State<TransactionScreen>
                 ..._buildCategoryBreakdown(context, provider, true),
                 const SizedBox(height: 24),
               ],
-              // Transactions List
               if (incomes.isEmpty)
                 Center(
                   child: Column(
@@ -294,7 +328,6 @@ class _TransactionScreenState extends State<TransactionScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Expense Summary
               GlassCard(
                 backgroundColor: Colors.red[50]?.withAlpha(150),
                 padding: const EdgeInsets.all(20),
@@ -326,7 +359,6 @@ class _TransactionScreenState extends State<TransactionScreen>
                 ),
               ),
               const SizedBox(height: 24),
-              // Category Breakdown
               if (expenses.isNotEmpty) ...[
                 Text(
                   'Kategoriler',
@@ -338,7 +370,6 @@ class _TransactionScreenState extends State<TransactionScreen>
                 ..._buildCategoryBreakdown(context, provider, false),
                 const SizedBox(height: 24),
               ],
-              // Transactions List
               if (expenses.isEmpty)
                 Center(
                   child: Column(
