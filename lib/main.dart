@@ -9,6 +9,7 @@ import 'providers/transaction_provider.dart';
 import 'providers/settings_provider.dart';
 import 'providers/wallet_provider.dart';
 import 'screens/home_screen.dart';
+import 'providers/bill_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,6 +33,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => TreeProvider()),
         ChangeNotifierProvider(create: (_) => TransactionProvider()),
         ChangeNotifierProvider(create: (_) => WalletProvider()),
+        ChangeNotifierProvider(create: (_) => BillProvider()),
       ],
       child: Consumer<SettingsProvider>(
         builder: (context, settings, _) {
