@@ -21,7 +21,7 @@ class _TreeScreenState extends State<TreeScreen> {
         return Scaffold(
           appBar: AppBar(
             title: const Text('🌳 Ağaç Yapısı'),
-            centerTitle: false,
+            centerTitle: true,
             elevation: 0,
             backgroundColor: Colors.transparent,
             foregroundColor: Theme.of(context).primaryColor,
