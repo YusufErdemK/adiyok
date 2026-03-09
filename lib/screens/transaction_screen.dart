@@ -23,7 +23,7 @@ class _TransactionScreenState extends State<TransactionScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
   }
 
   @override
@@ -38,7 +38,7 @@ class _TransactionScreenState extends State<TransactionScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('💰 Gelir & Gider'),
+        title: const Text('💰 Finans'),
         centerTitle: false,
         elevation: 0,
         backgroundColor: Colors.transparent,
@@ -46,14 +46,13 @@ class _TransactionScreenState extends State<TransactionScreen>
         bottom: TabBar(
           controller: _tabController,
           tabs: [
-            const Tab(text: 'Tümü'),
-            const Tab(text: '💰 Gelir'),
-            const Tab(text: '💸 Gider'),
+            const Tab(icon: Icon(Icons.receipt_long), text: 'İşlemler'),
             Tab(
+              icon: Icon(Icons.description_outlined),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('🧾 Faturalar'),
+                  const Text('Faturalar'),
                   if (unpaidCount > 0) ...[
                     const SizedBox(width: 4),
                     Container(
@@ -84,40 +83,80 @@ class _TransactionScreenState extends State<TransactionScreen>
           indicatorColor: Theme.of(context).primaryColor,
         ),
       ),
-      floatingActionButton: AnimatedBuilder(
-        animation: _tabController,
-        builder: (context, _) => _tabController.index == 3
-            ? const SizedBox.shrink()
-            : FloatingActionButton.extended(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) => const AddTransactionDialog(),
-                  );
-                },
-                icon: const Icon(Icons.add),
-                label: const Text('İşlem Ekle'),
-              ),
-      ),
       body: TabBarView(
         controller: _tabController,
+        children: [const _TransactionsTab(), const BillsTab()],
+      ),
+    );
+  }
+}
+
+// ── İŞLEMLER SEKMESİ ─────────────────────────────────────────────────────────
+
+class _TransactionsTab extends StatefulWidget {
+  const _TransactionsTab();
+
+  @override
+  State<_TransactionsTab> createState() => _TransactionsTabState();
+}
+
+class _TransactionsTabState extends State<_TransactionsTab>
+    with SingleTickerProviderStateMixin {
+  late TabController _innerTabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _innerTabController = TabController(length: 3, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _innerTabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => showDialog(
+          context: context,
+          builder: (context) => const AddTransactionDialog(),
+        ),
+        icon: const Icon(Icons.add),
+        label: const Text('İşlem Ekle'),
+      ),
+      body: Column(
         children: [
-          _buildAllTransactionsTab(),
-          _buildIncomeTab(),
-          _buildExpenseTab(),
-          const BillsTab(),
+          TabBar(
+            controller: _innerTabController,
+            tabs: const [
+              Tab(text: 'Tümü'),
+              Tab(text: '💰 Gelir'),
+              Tab(text: '💸 Gider'),
+            ],
+            labelColor: Theme.of(context).primaryColor,
+            unselectedLabelColor: Colors.grey[600],
+            indicatorColor: Theme.of(context).primaryColor,
+          ),
+          Expanded(
+            child: TabBarView(
+              controller: _innerTabController,
+              children: [_buildAllTab(), _buildIncomeTab(), _buildExpenseTab()],
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildAllTransactionsTab() {
+  Widget _buildAllTab() {
     return Consumer<TransactionProvider>(
       builder: (context, provider, _) {
         final transactions = provider.transactions;
-
         return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -126,7 +165,6 @@ class _TransactionScreenState extends State<TransactionScreen>
               if (transactions.isEmpty)
                 Center(
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const SizedBox(height: 40),
                       Icon(
@@ -147,50 +185,41 @@ class _TransactionScreenState extends State<TransactionScreen>
                           color: Colors.grey[500],
                         ),
                       ),
-                      const SizedBox(height: 40),
                     ],
                   ),
                 )
-              else
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Son İşlemler',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    ...transactions.asMap().entries.map((entry) {
-                      final transaction = entry.value;
-                      return Column(
-                        children: [
-                          TransactionCard(
-                            transaction: transaction,
-                            onDelete: () {
-                              provider.deleteTransaction(transaction.id);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('İşlem silindi')),
-                              );
-                            },
-                            onEdit: () {
-                              showDialog(
-                                context: context,
-                                builder: (context) => AddTransactionDialog(
-                                  initialTransaction: transaction,
-                                ),
-                              );
-                            },
-                          ),
-                          if (entry.key < transactions.length - 1)
-                            const SizedBox(height: 12),
-                        ],
-                      );
-                    }).toList(),
-                  ],
+              else ...[
+                Text(
+                  'Son İşlemler',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
-              const SizedBox(height: 24),
+                const SizedBox(height: 12),
+                ...transactions.asMap().entries.map((entry) {
+                  final t = entry.value;
+                  return Column(
+                    children: [
+                      TransactionCard(
+                        transaction: t,
+                        onDelete: () {
+                          provider.deleteTransaction(t.id);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('İşlem silindi')),
+                          );
+                        },
+                        onEdit: () => showDialog(
+                          context: context,
+                          builder: (_) =>
+                              AddTransactionDialog(initialTransaction: t),
+                        ),
+                      ),
+                      if (entry.key < transactions.length - 1)
+                        const SizedBox(height: 12),
+                    ],
+                  );
+                }),
+              ],
             ],
           ),
         );
@@ -202,9 +231,8 @@ class _TransactionScreenState extends State<TransactionScreen>
     return Consumer<TransactionProvider>(
       builder: (context, provider, _) {
         final incomes = provider.incomes;
-
         return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -249,11 +277,39 @@ class _TransactionScreenState extends State<TransactionScreen>
                 const SizedBox(height: 12),
                 ..._buildCategoryBreakdown(context, provider, true),
                 const SizedBox(height: 24),
-              ],
-              if (incomes.isEmpty)
+                Text(
+                  'Tüm Gelirler',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 12),
+                ...incomes.asMap().entries.map((entry) {
+                  final t = entry.value;
+                  return Column(
+                    children: [
+                      TransactionCard(
+                        transaction: t,
+                        onDelete: () {
+                          provider.deleteTransaction(t.id);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('İşlem silindi')),
+                          );
+                        },
+                        onEdit: () => showDialog(
+                          context: context,
+                          builder: (_) =>
+                              AddTransactionDialog(initialTransaction: t),
+                        ),
+                      ),
+                      if (entry.key < incomes.length - 1)
+                        const SizedBox(height: 12),
+                    ],
+                  );
+                }),
+              ] else
                 Center(
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const SizedBox(height: 40),
                       Icon(
@@ -267,50 +323,9 @@ class _TransactionScreenState extends State<TransactionScreen>
                         style: Theme.of(context).textTheme.headlineSmall
                             ?.copyWith(color: Colors.grey[600]),
                       ),
-                      const SizedBox(height: 40),
                     ],
                   ),
-                )
-              else
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Tüm Gelirler',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    ...incomes.asMap().entries.map((entry) {
-                      final transaction = entry.value;
-                      return Column(
-                        children: [
-                          TransactionCard(
-                            transaction: transaction,
-                            onDelete: () {
-                              provider.deleteTransaction(transaction.id);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('İşlem silindi')),
-                              );
-                            },
-                            onEdit: () {
-                              showDialog(
-                                context: context,
-                                builder: (context) => AddTransactionDialog(
-                                  initialTransaction: transaction,
-                                ),
-                              );
-                            },
-                          ),
-                          if (entry.key < incomes.length - 1)
-                            const SizedBox(height: 12),
-                        ],
-                      );
-                    }).toList(),
-                  ],
                 ),
-              const SizedBox(height: 24),
             ],
           ),
         );
@@ -322,9 +337,8 @@ class _TransactionScreenState extends State<TransactionScreen>
     return Consumer<TransactionProvider>(
       builder: (context, provider, _) {
         final expenses = provider.expenses;
-
         return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -369,11 +383,39 @@ class _TransactionScreenState extends State<TransactionScreen>
                 const SizedBox(height: 12),
                 ..._buildCategoryBreakdown(context, provider, false),
                 const SizedBox(height: 24),
-              ],
-              if (expenses.isEmpty)
+                Text(
+                  'Tüm Giderler',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 12),
+                ...expenses.asMap().entries.map((entry) {
+                  final t = entry.value;
+                  return Column(
+                    children: [
+                      TransactionCard(
+                        transaction: t,
+                        onDelete: () {
+                          provider.deleteTransaction(t.id);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('İşlem silindi')),
+                          );
+                        },
+                        onEdit: () => showDialog(
+                          context: context,
+                          builder: (_) =>
+                              AddTransactionDialog(initialTransaction: t),
+                        ),
+                      ),
+                      if (entry.key < expenses.length - 1)
+                        const SizedBox(height: 12),
+                    ],
+                  );
+                }),
+              ] else
                 Center(
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const SizedBox(height: 40),
                       Icon(
@@ -387,50 +429,9 @@ class _TransactionScreenState extends State<TransactionScreen>
                         style: Theme.of(context).textTheme.headlineSmall
                             ?.copyWith(color: Colors.grey[600]),
                       ),
-                      const SizedBox(height: 40),
                     ],
                   ),
-                )
-              else
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Tüm Giderler',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    ...expenses.asMap().entries.map((entry) {
-                      final transaction = entry.value;
-                      return Column(
-                        children: [
-                          TransactionCard(
-                            transaction: transaction,
-                            onDelete: () {
-                              provider.deleteTransaction(transaction.id);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('İşlem silindi')),
-                              );
-                            },
-                            onEdit: () {
-                              showDialog(
-                                context: context,
-                                builder: (context) => AddTransactionDialog(
-                                  initialTransaction: transaction,
-                                ),
-                              );
-                            },
-                          ),
-                          if (entry.key < expenses.length - 1)
-                            const SizedBox(height: 12),
-                        ],
-                      );
-                    }).toList(),
-                  ],
                 ),
-              const SizedBox(height: 24),
             ],
           ),
         );
@@ -444,60 +445,56 @@ class _TransactionScreenState extends State<TransactionScreen>
     bool isIncome,
   ) {
     final categories = isIncome
-        ? TransactionCategory.values.where((cat) => cat.isIncome).toList()
-        : TransactionCategory.values.where((cat) => cat.isExpense).toList();
+        ? TransactionCategory.values.where((c) => c.isIncome).toList()
+        : TransactionCategory.values.where((c) => c.isExpense).toList();
 
     final items = <Widget>[];
-
     for (final category in categories) {
       final total = provider.getCategoryTotal(category);
-      final transactions = provider.getTransactionsByCategory(category);
-
-      if (total > 0) {
-        items.add(
-          GlassCard(
-            backgroundColor: isIncome
-                ? Colors.green[50]?.withAlpha(50)
-                : Colors.red[50]?.withAlpha(50),
-            child: Row(
-              children: [
-                Text(category.emoji, style: const TextStyle(fontSize: 28)),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        category.label,
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+      if (total <= 0) continue;
+      final txCount = provider.getTransactionsByCategory(category).length;
+      items.add(
+        GlassCard(
+          backgroundColor: isIncome
+              ? Colors.green[50]?.withAlpha(50)
+              : Colors.red[50]?.withAlpha(50),
+          child: Row(
+            children: [
+              Text(category.emoji, style: const TextStyle(fontSize: 28)),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      category.label,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${transactions.length} işlem',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '$txCount işlem',
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+                    ),
+                  ],
                 ),
-                Text(
-                  '₺${total.toStringAsFixed(2)}',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: isIncome ? Colors.green[700] : Colors.red[700],
-                    fontWeight: FontWeight.bold,
-                  ),
+              ),
+              Text(
+                '₺${total.toStringAsFixed(2)}',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  color: isIncome ? Colors.green[700] : Colors.red[700],
+                  fontWeight: FontWeight.bold,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        );
-        items.add(const SizedBox(height: 12));
-      }
+        ),
+      );
+      items.add(const SizedBox(height: 12));
     }
-
     return items;
   }
 }
