@@ -16,8 +16,10 @@ void main() async {
   await StorageService.init();
   await initializeDateFormatting('tr_TR');
 
-  final player = AudioPlayer();
-  await player.play(AssetSource('sounds/click.mp3'));
+  try {
+    final player = AudioPlayer();
+    await player.play(AssetSource('sounds/click.mp3'));
+  } catch (_) {}
 
   runApp(const MyApp());
 }
