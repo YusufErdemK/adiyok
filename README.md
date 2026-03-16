@@ -1,175 +1,152 @@
-# 🌳 Adiyok - Tree & Finance Management App  
+# 🌳 Adiyok
 
-Adiyok is a modern and professional Flutter application designed to help you manage hierarchical tree structures while simultaneously tracking income and expenses.
+A Flutter app built for my father — combines hierarchical tree management with personal finance tracking.
 
-## 🎯 Features
+> *Manage your assets like a tree: structured, growing, and deeply rooted.*
 
-### 🌳 Tree Structure Management
-- ✅ Create root elements
-- ✅ Unlimited hierarchical sub-elements
-- ✅ Smooth expand/collapse animations
-- ✅ Edit and delete operations
-- ✅ Depth and node count statistics
+---
 
-### 💰 Income/Expense Tracking
-- ✅ Add income (5 categories)
-- ✅ Add expenses (8 categories)
-- ✅ Color coding (Green/Red)
-- ✅ Automatic net income calculation
-- ✅ Category-based statistics
-- ✅ Date-based filtering
+## ✨ Features
 
-## 🚀 Quick Start
+### 🌳 Tree Management
+- Unlimited depth hierarchical structure
+- Smooth expand/collapse animations
+- Add, edit, and delete nodes at any level
+- Node count and depth statistics
 
-```bash
-# Install packages
-flutter pub get
+### 💰 Finance Tracking
+- Income & expense transactions with categories
+- Net income calculation
+- Category breakdowns and monthly summaries
+- Calendar view for transaction history
+- Business/vendor grouping in summary screen
 
-# Run the app
-flutter run
-```
+### 🧾 Bill Tracking
+- Recurring monthly bills (electricity, water, gas, internet, rent, phone, custom)
+- Mark bills as paid per month
+- Overdue and upcoming bill warnings
+- Month navigation to view past/future billing periods
 
-**To get started in 5 minutes:** Check out the [QUICKSTART.md](QUICKSTART.md) file.
+### 💳 Wallet
+- Manual or auto-calculated balance
+- Card management (bank cards, credit cards)
+- Tree-structured accounts (unlimited depth)
+- Piggy banks with savings goals and progress tracking
+
+### ⚙️ Other
+- Dark / Light / System theme
+- Local data persistence (SharedPreferences)
+- Works fully offline
+
+---
 
 ## 📱 Screenshots
 
-![ssv0.0.1](readme/screenshot-linux-v0.0.1-1.png)
+| Tree | Finance | Summary |
+|------|---------|---------|
+| ![Tree](readme/newnew/tree.png) | ![Finance](readme/newnew/finance.png) | ![Summary](readme/newnew/summary.png) |
 
-### Tree Structure
+| Calendar | Companies | Piggy Bank |
+|----------|-----------|------------|
+| ![Calendar](readme/newnew/calendar.png) | ![Companies](readme/newnew/companies.png) | ![Piggy Bank](readme/newnew/piggybank.png) |
 
-* Root elements and hierarchical view
-* Expanded/collapsed states
-* Statistics display
+---
 
-### Finance Management
+## 🚀 Getting Started
 
-* Net income summary
-* Transaction lists
-* Category breakdown
-* Filter tabs
+```bash
+# Clone the repo
+git clone https://github.com/YusufErdemK/adiyok.git
+cd adiyok
 
-## 📚 Documentation
+# Install dependencies
+flutter pub get
 
-| File | Description |
-| --- | --- |
-| [QUICKSTART.md](QUICKSTART.md) | 5-minute startup guide |
-| [GUIDE.md](REHBER.md) | Detailed user guide |
-| [DEVELOPING.md](DEVELOPING.md) | Developer guide |
-| [CODE_STRUCTURE.md](CODE_STRUCTURE.md) | Code structure and architecture |
-
-## 🏗️ Technical Details
-
-* **Framework:** Flutter 3.10.4+
-* **Language:** Dart 3.0+
-* **State Management:** Provider (ChangeNotifier)
-* **UI Framework:** Material Design 3
-* **Package Manager:** pub.dev
-
-### Dependencies
-
-```yaml
-provider: ^6.0.0          # State Management
-google_fonts: ^6.0.0      # Typography
-intl: ^0.19.0             # Internationalization
-uuid: ^4.0.0              # Unique IDs
-```
-
-## 📊 Project Statistics
-
-* **Total Dart Files:** 17
-* **Total Lines of Code:** 2,419
-* **Screens:** 3
-* **Providers:** 2
-* **Widgets:** 5
-* **Models:** 2
-
-## 🎨 Design
-
-* **Color Scheme:** Material Design 3 (Seed: #2D6A4F)
-* **Typography:** Google Fonts (Poppins)
-* **Icons:** Material Icons + Emojis
-* **Animations:** 300ms Smooth Transitions
-
-## 💡 Usage Examples
-
-### Creating a Tree
-
-1. Go to "Tree" tab → Click "Add Root Element"
-2. Enter a name (e.g., "My Companies")
-3. Click "Add"
-4. Select "Add Sub-element" from the menu
-
-### Adding a Transaction
-
-1. Go to "Finance" tab → Click "Add Transaction"
-2. Select "Income" or "Expense"
-3. Enter title, amount, and category
-4. Click "Save"
-
-## 🔧 Development
-
-### Project Structure
-
-```
-lib/
-├── main.dart              # App entry point
-├── models/                # Data models (2 files)
-├── providers/             # State Management (2 files)
-├── screens/               # Full screens (3 files)
-└── widgets/               # Widget components (5 files)
-
+# Run
+flutter run
 ```
 
 ### Build
 
 ```bash
-# Android
+# Android APK
 flutter build apk --release
 
-# iOS
-flutter build ios --release
+# Android App Bundle (Play Store)
+flutter build appbundle --release
 
-# Web
-flutter build web --release
-
+# Linux
+flutter build linux --release
 ```
-
-## ❓ FAQ
-
-**Q: Where is my data stored?**
-
-* Currently stored in RAM (for the duration of the session). SharedPreferences/Local DB can be added.
-
-**Q: Does it work offline?**
-
-* Yes! It is entirely local and does not require an internet connection.
-
-**Q: Can I store unlimited data?**
-
-* Yes, practically 10,000+ transactions and tree nodes will run smoothly.
-
-**Q: Can I change the theme?**
-
-* Yes, it automatically follows your device's system settings.
-
-## 📝 License
-
-Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
-
-## 🤝 Contributing
-
-Feel free to open GitHub issues for improvements and suggestions.
-
-## 📞 Contact
-
-For questions and suggestions, please contact.
 
 ---
 
-**Version:** 1.0.0
+## 🏗️ Architecture
 
-**Status:** ✅ Completed
+```
+lib/
+├── main.dart
+├── models/
+│   ├── card_model.dart
+│   ├── transaction.dart
+│   └── tree_node.dart
+├── providers/
+│   ├── bill_provider.dart
+│   ├── settings_provider.dart
+│   ├── transaction_provider.dart
+│   ├── tree_provider.dart
+│   └── wallet_provider.dart
+├── screens/
+│   ├── bills_tab.dart
+│   ├── home_screen.dart
+│   ├── settings.dart
+│   ├── summary_screen.dart
+│   ├── transaction_screen.dart
+│   ├── tree_screen.dart
+│   └── wallet_screen.dart
+├── services/
+│   ├── sound_service.dart
+│   └── storage_service.dart
+└── widgets/
+    ├── add_transaction_dialog.dart
+    ├── glass_card.dart
+    ├── stats_summary.dart
+    ├── transaction_card.dart
+    └── tree_node_widget.dart
+```
 
-**Last Updated:** January 2026
+**State management:** Provider (ChangeNotifier)  
+**UI:** Material Design 3  
+**Typography:** Google Fonts — Poppins  
+**Persistence:** SharedPreferences  
+**Charts:** fl_chart  
 
-*Developed with ❤️ by **erdamn** (Yusuf Erdem Kaymak) for his father.*
+### Dependencies
+
+| Package | Purpose |
+|---------|---------|
+| `provider` | State management |
+| `shared_preferences` | Local storage |
+| `google_fonts` | Poppins typography |
+| `fl_chart` | Charts and graphs |
+| `intl` | Date/number formatting |
+| `audioplayers` | UI sound effects |
+| `uuid` | Unique IDs |
+
+---
+
+## 📊 Stats
+
+- **26 Dart files** · **~8,000 lines of code**
+- **5 providers** · **8 screens** · **6 widgets** · **3 models**
+- **Version:** 1.0.0
+
+---
+
+## 🤝 Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+---
+
+*Developed with ❤️ by [YusufErdemK](https://github.com/YusufErdemK) for his father.*
