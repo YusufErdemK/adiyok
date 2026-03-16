@@ -42,15 +42,29 @@ A Flutter app built for my father — combines hierarchical tree management with
 
 ## 📱 Screenshots
 
-| Tree | Finance | Summary |
-|------|---------|---------|
-| ![Tree](readme/newnew/tree.png) | ![Finance](readme/newnew/finance.png) | ![Summary](readme/newnew/summary.png) |
+<table>
+  <tr>
+    <td><img src="readme/newnew/tree.png" width="180"/></td>
+    <td><img src="readme/newnew/finance.png" width="180"/></td>
+    <td><img src="readme/newnew/summary.png" width="180"/></td>
+  </tr>
+  <tr>
+    <td align="center">Tree</td>
+    <td align="center">Finance</td>
+    <td align="center">Summary</td>
+  </tr>
+  <tr>
+    <td><img src="readme/newnew/calendar.png" width="180"/></td>
+    <td><img src="readme/newnew/companies.png" width="180"/></td>
+    <td><img src="readme/newnew/piggybank.png" width="180"/></td>
+  </tr>
+  <tr>
+    <td align="center">Calendar</td>
+    <td align="center">Companies</td>
+    <td align="center">Piggy Bank</td>
+  </tr>
+</table>
 
-| Calendar | Companies | Piggy Bank |
-|----------|-----------|------------|
-| ![Calendar](readme/newnew/calendar.png) | ![Companies](readme/newnew/companies.png) | ![Piggy Bank](readme/newnew/piggybank.png) |
-
----
 
 ## 🚀 Getting Started
 
