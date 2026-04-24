@@ -936,6 +936,19 @@ class _CalendarTabState extends State<_CalendarTab> {
         .map((t) => t.date.day)
         .toSet();
 
+    // Gün bazlı harcama toplamları (ısı haritası için)
+    final dayExpenses = <int, double>{};
+    for (final t in transactions.where(
+      (t) =>
+          t.date.year == _focusedMonth.year &&
+          t.date.month == _focusedMonth.month &&
+          t.isExpense,
+    )) {
+      dayExpenses[t.date.day] =
+          (dayExpenses[t.date.day] ?? 0) + t.amount * t.quantity;
+    }
+    final maxExpense = dayExpenses.values.fold(0.0, max);
+
     // Ay özeti
     final monthTx = transactions.where(
       (t) =>
@@ -1041,6 +1054,10 @@ class _CalendarTabState extends State<_CalendarTab> {
                         date.month == today.month &&
                         date.day == today.day;
                     final hasActivity = activeDays.contains(day);
+                    final expense = dayExpenses[day] ?? 0;
+                    final heatIntensity = maxExpense > 0
+                        ? (expense / maxExpense)
+                        : 0.0;
 
                     return GestureDetector(
                       onTap: () => _showDaySheet(context, date, transactions),
