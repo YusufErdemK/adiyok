@@ -103,6 +103,9 @@ class _TransactionsTab extends StatefulWidget {
 class _TransactionsTabState extends State<_TransactionsTab>
     with SingleTickerProviderStateMixin {
   late TabController _innerTabController;
+  String _searchQuery = '';
+  bool _isSearching = false;
+  final _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -113,38 +116,88 @@ class _TransactionsTabState extends State<_TransactionsTab>
   @override
   void dispose() {
     _innerTabController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => showDialog(
-          context: context,
-          builder: (context) => const AddTransactionDialog(),
-        ),
-        icon: const Icon(Icons.add),
-        label: const Text('İşlem Ekle'),
-      ),
+      floatingActionButton: _isSearching
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: () => showDialog(
+                context: context,
+                builder: (context) => const AddTransactionDialog(),
+              ),
+              icon: const Icon(Icons.add),
+              label: const Text('İşlem Ekle'),
+            ),
       body: Column(
         children: [
-          TabBar(
-            controller: _innerTabController,
-            tabs: const [
-              Tab(text: 'Tümü'),
-              Tab(text: '💰 Gelir'),
-              Tab(text: '💸 Gider'),
-            ],
-            labelColor: Theme.of(context).primaryColor,
-            unselectedLabelColor: Colors.grey[600],
-            indicatorColor: Theme.of(context).primaryColor,
-          ),
-          Expanded(
-            child: TabBarView(
-              controller: _innerTabController,
-              children: [_buildAllTab(), _buildIncomeTab(), _buildExpenseTab()],
+          // Arama kutusu
+          if (_isSearching)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: TextField(
+                controller: _searchController,
+                autofocus: true,
+                decoration: InputDecoration(
+                  hintText: 'İşlem ara...',
+                  prefixIcon: const Icon(Icons.search, size: 20),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.close, size: 20),
+                    onPressed: () => setState(() {
+                      _isSearching = false;
+                      _searchQuery = '';
+                      _searchController.clear();
+                    }),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                ),
+                onChanged: (v) =>
+                    setState(() => _searchQuery = v.toLowerCase()),
+              ),
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 8, 0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TabBar(
+                      controller: _innerTabController,
+                      tabs: const [
+                        Tab(text: 'Tümü'),
+                        Tab(text: '💰 Gelir'),
+                        Tab(text: '💸 Gider'),
+                      ],
+                      labelColor: Theme.of(context).primaryColor,
+                      unselectedLabelColor: Colors.grey[600],
+                      indicatorColor: Theme.of(context).primaryColor,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.search),
+                    onPressed: () => setState(() => _isSearching = true),
+                  ),
+                ],
+              ),
             ),
+          Expanded(
+            child: _isSearching && _searchQuery.isNotEmpty
+                ? _buildSearchResults()
+                : TabBarView(
+                    controller: _innerTabController,
+                    children: [
+                      _buildAllTab(),
+                      _buildIncomeTab(),
+                      _buildExpenseTab(),
+                    ],
+                  ),
           ),
         ],
       ),
@@ -434,6 +487,59 @@ class _TransactionsTabState extends State<_TransactionsTab>
                 ),
             ],
           ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSearchResults() {
+    return Consumer<TransactionProvider>(
+      builder: (context, provider, _) {
+        final results = provider.transactions
+            .where(
+              (t) =>
+                  t.title.toLowerCase().contains(_searchQuery) ||
+                  t.displayCategory.toLowerCase().contains(_searchQuery) ||
+                  (t.notes?.toLowerCase().contains(_searchQuery) ?? false),
+            )
+            .toList();
+
+        if (results.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.search_off, size: 48, color: Colors.grey[300]),
+                const SizedBox(height: 12),
+                Text(
+                  '"$_searchQuery" için sonuç yok',
+                  style: TextStyle(color: Colors.grey[400]),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return ListView.separated(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 80),
+          itemCount: results.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          itemBuilder: (context, i) {
+            final t = results[i];
+            return TransactionCard(
+              transaction: t,
+              onDelete: () {
+                provider.deleteTransaction(t.id);
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(const SnackBar(content: Text('İşlem silindi')));
+              },
+              onEdit: () => showDialog(
+                context: context,
+                builder: (_) => AddTransactionDialog(initialTransaction: t),
+              ),
+            );
+          },
         );
       },
     );
