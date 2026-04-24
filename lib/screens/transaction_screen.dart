@@ -52,7 +52,7 @@ class _TransactionScreenState extends State<TransactionScreen>
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('Faturalar'),
+                  const Text('Süreli'),
                   if (unpaidCount > 0) ...[
                     const SizedBox(width: 4),
                     Container(
