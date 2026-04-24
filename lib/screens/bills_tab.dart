@@ -67,7 +67,7 @@ class _BillsTabState extends State<BillsTab> {
           builder: (_) => const _AddBillDialog(),
         ),
         icon: const Icon(Icons.add),
-        label: const Text('Fatura Ekle'),
+        label: const Text('Süreli Ekle'),
       ),
       body: Column(
         children: [
@@ -132,7 +132,7 @@ class _BillsTabState extends State<BillsTab> {
                       children: [
                         Text('🧾', style: const TextStyle(fontSize: 56)),
                         const SizedBox(height: 16),
-                        Text('Henüz fatura eklenmedi',
+                        Text('Henüz süreli işlem eklenmedi',
                             style: TextStyle(
                                 fontSize: 16,
                                 color: colorScheme.onSurface.withValues(alpha: 0.4))),
@@ -377,7 +377,7 @@ class _AddBillDialogState extends State<_AddBillDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Fatura Ekle'),
+      title: const Text('Süreli İşlem Ekle'),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       content: SingleChildScrollView(
         child: Column(
@@ -423,7 +423,7 @@ class _AddBillDialogState extends State<_AddBillDialog> {
             TextField(
               controller: _nameController,
               decoration: InputDecoration(
-                labelText: 'Fatura Adı',
+                labelText: 'Süreli İşlem Adı',
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
               ),
             ),
