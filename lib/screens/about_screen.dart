@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AboutScreen extends StatelessWidget {
@@ -43,7 +44,7 @@ class AboutScreen extends StatelessWidget {
               style: TextStyle(fontSize: 16, color: Colors.grey[600]),
             ),
             const SizedBox(height: 40),
-            // Info Cards
+            // Normal Info Cards (Bunlar IconData alıyor)
             _buildInfoCard(
               icon: Icons.info_outline,
               title: 'Uygulama Hakkında',
@@ -63,10 +64,14 @@ class AboutScreen extends StatelessWidget {
               description: 'Flutter & Dart',
             ),
             const SizedBox(height: 16),
-            // GitHub Link Card
+            // GitHub Link Card (Bu artık Widget alıyor, FaIcon verdik)
             _buildClickableInfoCard(
               context: context,
-              icon: Icons.code_outlined,
+              icon: const FaIcon(
+                FontAwesomeIcons.github,
+                color: Colors.green,
+                size: 24,
+              ),
               title: 'GitHub',
               description: 'github.com/YusufErdemK/adiyok',
               onTap: () => _launchURL('https://github.com/YusufErdemK/adiyok'),
@@ -84,6 +89,7 @@ class AboutScreen extends StatelessWidget {
     );
   }
 
+  // Tıklanamayan normal kartlar için (Standart IconData bekler)
   Widget _buildInfoCard({
     required IconData icon,
     required String title,
@@ -131,9 +137,10 @@ class AboutScreen extends StatelessWidget {
     );
   }
 
+  // Tıklanabilir GitHub kartı için (Widget bekler)
   Widget _buildClickableInfoCard({
     required BuildContext context,
-    required IconData icon,
+    required Widget icon,
     required String title,
     required String description,
     required VoidCallback onTap,
@@ -155,7 +162,7 @@ class AboutScreen extends StatelessWidget {
                   color: Colors.green.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, color: Colors.green, size: 24),
+                child: icon,
               ),
               const SizedBox(width: 16),
               Expanded(
