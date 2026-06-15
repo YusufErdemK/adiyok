@@ -1055,6 +1055,7 @@ class _CalendarTabState extends State<_CalendarTab> {
                         date.day == today.day;
                     final hasActivity = activeDays.contains(day);
                     final expense = dayExpenses[day] ?? 0;
+                    // ignore: unused_local_variable twin
                     final heatIntensity = maxExpense > 0
                         ? (expense / maxExpense)
                         : 0.0;

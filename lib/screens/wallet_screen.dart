@@ -56,8 +56,6 @@ class _WalletScreenState extends State<WalletScreen>
   }
 }
 
-// ── BAKİYE SEKMESİ ────────────────────────────────────────────────────────────
-
 class _BalanceTab extends StatefulWidget {
   const _BalanceTab();
 
