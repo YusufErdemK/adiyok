@@ -38,11 +38,8 @@ class _TransactionScreenState extends State<TransactionScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('💰 Finans'),
-        centerTitle: false,
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        foregroundColor: Theme.of(context).primaryColor,
+        title: const Text('Finans'),
+        centerTitle: true,
         bottom: TabBar(
           controller: _tabController,
           tabs: [
@@ -90,8 +87,6 @@ class _TransactionScreenState extends State<TransactionScreen>
     );
   }
 }
-
-// ── İŞLEMLER SEKMESİ ─────────────────────────────────────────────────────────
 
 class _TransactionsTab extends StatefulWidget {
   const _TransactionsTab();
