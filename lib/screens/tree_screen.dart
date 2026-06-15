@@ -19,13 +19,7 @@ class _TreeScreenState extends State<TreeScreen> {
         final roots = treeProvider.roots;
 
         return Scaffold(
-          appBar: AppBar(
-            title: const Text('🌳 Ağaç Yapısı'),
-            centerTitle: true,
-            elevation: 0,
-            backgroundColor: Colors.transparent,
-            foregroundColor: Theme.of(context).primaryColor,
-          ),
+          appBar: AppBar(title: const Text('Ağaç'), centerTitle: true),
           floatingActionButton: FloatingActionButton.extended(
             onPressed: _showAddRootDialog,
             icon: const Icon(Icons.add),
