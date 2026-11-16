@@ -1,4 +1,4 @@
-# 🌳 Adiyok  
+# 🌳 Adiyok
 
 A Flutter app built for my father — combines hierarchical tree management with personal finance tracking.
 
